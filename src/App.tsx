@@ -378,15 +378,10 @@ export default function App() {
           </div>
         )}
 
-        {/* Stale / offline indicator */}
-        {stale && (
-          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-medium text-amber-800">
-            <span>
-              {offline ? '📴 Sin conexión — mostrando datos guardados'
-                : source === 'dummy' ? '🧪 Datos de demostración'
-                  : `💾 Datos guardados${cachedAt ? ' · ' + new Date(cachedAt).toLocaleString('es-VE') : ''}`}
-            </span>
-            {!offline && <button onClick={refresh} className="font-semibold underline">Actualizar</button>}
+        {/* Offline indicator */}
+        {offline && (
+          <div className="flex shrink-0 items-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-medium text-amber-800">
+            <span>📴 Sin conexión — mostrando datos guardados</span>
           </div>
         )}
 
