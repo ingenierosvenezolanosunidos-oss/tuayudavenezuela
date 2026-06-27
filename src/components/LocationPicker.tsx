@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { CARACAS_CENTER } from '../data/dummy'
@@ -25,19 +25,22 @@ function ClickCapture({ onChange }: { onChange: (lat: number, lng: number) => vo
   return null
 }
 
-function FlyTo({ lat, lng }: { lat: number | null; lng: number | null }) {
+function FlyTo({ target }: { target: [number, number] | null }) {
   const map = useMap()
+  const prev = useRef<[number, number] | null>(null)
   useEffect(() => {
-    if (lat != null && lng != null) {
-      map.flyTo([lat, lng], 16, { duration: 1 })
-    }
-  }, [lat, lng, map])
+    if (!target) return
+    if (prev.current?.[0] === target[0] && prev.current?.[1] === target[1]) return
+    prev.current = target
+    map.flyTo(target, 16, { duration: 1 })
+  }, [target, map])
   return null
 }
 
 export default function LocationPicker({ lat, lng, onChange }: Props) {
   const [locating, setLocating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [gpsTarget, setGpsTarget] = useState<[number, number] | null>(null)
 
   function useGps() {
     if (!navigator.geolocation) {
@@ -48,7 +51,9 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
     setError(null)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        onChange(pos.coords.latitude, pos.coords.longitude)
+        const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude]
+        onChange(coords[0], coords[1])
+        setGpsTarget(coords)
         setLocating(false)
       },
       () => {
@@ -59,7 +64,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
     )
   }
 
-  const center: [number, number] = lat != null && lng != null ? [lat, lng] : CARACAS_CENTER
+  const center: [number, number] = CARACAS_CENTER
 
   return (
     <div>
@@ -78,7 +83,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
         <MapContainer center={center} zoom={13} className="h-full w-full" zoomControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
           <ClickCapture onChange={onChange} />
-          <FlyTo lat={lat} lng={lng} />
+          <FlyTo target={gpsTarget} />
           {lat != null && lng != null && <Marker position={[lat, lng]} icon={pin} />}
         </MapContainer>
       </div>
