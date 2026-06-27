@@ -8,6 +8,34 @@ interface Props {
   onSelect: (r: Report) => void
 }
 
+function SecurityNotice() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="shrink-0 mx-4 mt-3 mb-1 lg:mx-auto lg:max-w-2xl lg:w-full">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="flex w-full items-center gap-2.5 text-left"
+        >
+          <span className="mt-0.5 shrink-0 text-lg">⚠️</span>
+          <p className="flex-1 text-xs font-bold text-amber-800">Aviso de seguridad — protégete de estafas</p>
+          <span className="text-amber-600 text-xs">{open ? '▲' : '▼'}</span>
+        </button>
+        {open && (
+          <ul className="mt-1.5 ml-7 space-y-1 text-[11px] leading-relaxed text-amber-700">
+            <li>• <strong>Nunca envíes dinero por adelantado</strong> a cambio de un servicio o ayuda.</li>
+            <li>• Desconfía de quienes pidan pagos por transferencia, recarga o criptomonedas sin haberte conocido antes.</li>
+            <li>• Verifica la identidad de la persona antes de compartir datos personales o tu ubicación exacta.</li>
+            <li>• Acuerda el primer encuentro en un lugar público y con alguien de confianza presente.</li>
+            <li>• Si algo parece demasiado bueno para ser verdad, probablemente no lo sea.</li>
+            <li>• <strong>Esta plataforma no cobra ni avala ningún servicio.</strong> Reporta actividad sospechosa al correo de contacto.</li>
+          </ul>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function catInfo(value: string) {
   return SERVICIO_CATS.find((c) => c.value === value) ?? { label: value, emoji: '🔩' }
 }
@@ -81,24 +109,7 @@ export default function ServiciosView({ services, onAdd, onSelect }: Props) {
       </div>
 
       {/* Security alert */}
-      <div className="shrink-0 mx-4 mt-3 mb-1 lg:mx-auto lg:max-w-2xl lg:w-full">
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 shrink-0 text-lg">⚠️</span>
-            <div>
-              <p className="text-xs font-bold text-amber-800">Aviso de seguridad — protégete de estafas</p>
-              <ul className="mt-1.5 space-y-1 text-[11px] leading-relaxed text-amber-700">
-                <li>• <strong>Nunca envíes dinero por adelantado</strong> a cambio de un servicio o ayuda.</li>
-                <li>• Desconfía de quienes pidan pagos por transferencia, recarga o criptomonedas sin haberte conocido antes.</li>
-                <li>• Verifica la identidad de la persona antes de compartir datos personales o tu ubicación exacta.</li>
-                <li>• Acuerda el primer encuentro en un lugar público y con alguien de confianza presente.</li>
-                <li>• Si algo parece demasiado bueno para ser verdad, probablemente no lo sea.</li>
-                <li>• <strong>Esta plataforma no cobra ni avala ningún servicio.</strong> Reporta actividad sospechosa al correo de contacto.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
+      <SecurityNotice />
 
       {/* List */}
       <div className="flex-1 overflow-y-auto">

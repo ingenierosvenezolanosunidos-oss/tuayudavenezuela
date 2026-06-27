@@ -4,7 +4,9 @@ import type { Report } from '../types'
 // not configured, and as the offline fallback. Coordinates are real-ish points
 // around the city so the map looks alive during development.
 
-export const DUMMY_REPORTS: Report[] = [
+export const DUMMY_REPORTS: Report[] = []
+
+const _unused = [
   {
     id: 'd-acopio-1',
     tipo: 'acopio',
@@ -208,6 +210,8 @@ export const DUMMY_REPORTS: Report[] = [
       { id: 'nz5', report_id: 'd-necesidades-2', nombre: 'Ropa', nivel: 'bajo' },
     ],
   },
+]
+
 ]
 
 export const CARACAS_CENTER: [number, number] = [10.4806, -66.9036]
