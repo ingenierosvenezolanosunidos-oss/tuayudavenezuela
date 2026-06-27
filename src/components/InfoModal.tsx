@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { TELEFONOS_EMERGENCIA, PRIMERAS_HORAS, PLATAFORMAS_AYUDA } from '../data/recursos'
+import { TELEFONOS_EMERGENCIA, PRIMERAS_HORAS } from '../data/recursos'
 
 interface Props {
   onClose: () => void
 }
 
-type Tab = 'telefonos' | 'guia' | 'plataformas'
+type Tab = 'telefonos' | 'guia'
 
 export default function InfoModal({ onClose }: Props) {
   const [tab, setTab] = useState<Tab>('telefonos')
@@ -26,9 +26,6 @@ export default function InfoModal({ onClose }: Props) {
           </TabBtn>
           <TabBtn active={tab === 'guia'} onClick={() => setTab('guia')}>
             🧭 Primeras horas
-          </TabBtn>
-          <TabBtn active={tab === 'plataformas'} onClick={() => setTab('plataformas')}>
-            🌐 Plataformas
           </TabBtn>
         </div>
 
@@ -77,33 +74,6 @@ export default function InfoModal({ onClose }: Props) {
             </ol>
           )}
 
-          {tab === 'plataformas' && (
-            <div className="space-y-4">
-              <p className="text-sm text-gray-500">
-                Iniciativas ciudadanas de ayuda para Venezuela. No son organismos oficiales.
-              </p>
-              {PLATAFORMAS_AYUDA.map((p) => (
-                <a
-                  key={p.nombre}
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 shadow-card transition-colors hover:border-brand/30 hover:bg-brand-tint active:bg-gray-50"
-                >
-                  <span className="mt-0.5 text-2xl">{p.emoji}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-gray-900">{p.nombre}</div>
-                    <div className="text-sm text-gray-500">{p.descripcion}</div>
-                    <div className="mt-1 text-xs font-medium text-brand">{p.url.replace('https://', '')}</div>
-                  </div>
-                  <span className="mt-1 text-gray-400 text-sm">↗</span>
-                </a>
-              ))}
-              <p className="text-xs text-gray-400">
-                Estas plataformas son iniciativas independientes y no sustituyen a los servicios de emergencia.
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
