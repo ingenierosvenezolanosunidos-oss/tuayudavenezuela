@@ -11,6 +11,7 @@ import {
 import LocalizarModal, { type LocalizacionData } from './LocalizarModal'
 import ShareBar from './ShareBar'
 import ReportarContenidoModal from './ReportarContenidoModal'
+import SolicitarEliminacionModal from './SolicitarEliminacionModal'
 
 interface Props {
   report: Report | null
@@ -292,6 +293,7 @@ function CategoryBody({
 export default function DetailPanel({ report, onClose, onUpdateEstado, onLocalizar }: Props) {
   const [localizarOpen, setLocalizarOpen] = useState(false)
   const [reportarOpen, setReportarOpen] = useState(false)
+  const [eliminarOpen, setEliminarOpen] = useState(false)
   if (!report) return null
   const layer = LAYER_BY_ID[report.tipo]
 
@@ -348,6 +350,15 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
           <div className="mt-3 border-t pt-2 text-xs text-gray-400">
             Reportado: {new Date(report.created_at).toLocaleString('es-VE')}
           </div>
+
+          <div className="mt-2 text-center">
+            <button
+              onClick={() => setEliminarOpen(true)}
+              className="text-xs text-gray-400 underline hover:text-red-500"
+            >
+              Solicitar eliminación de este registro
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -366,6 +377,14 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
         <ReportarContenidoModal
           reportId={report.id}
           onClose={() => setReportarOpen(false)}
+        />
+      )}
+
+      {eliminarOpen && (
+        <SolicitarEliminacionModal
+          reportId={report.id}
+          nombreRegistro={report.nombre}
+          onClose={() => setEliminarOpen(false)}
         />
       )}
     </>
