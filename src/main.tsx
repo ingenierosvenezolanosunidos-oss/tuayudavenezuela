@@ -5,7 +5,7 @@ import './index.css'
 import App from './App'
 import AdminPage from './pages/AdminPage'
 
-const isAdmin = window.location.pathname === '/admin'
+const isAdmin = new URLSearchParams(window.location.search).has('admin')
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
