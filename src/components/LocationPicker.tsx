@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { useState, useEffect } from 'react'
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { CARACAS_CENTER } from '../data/dummy'
 
@@ -22,6 +22,16 @@ function ClickCapture({ onChange }: { onChange: (lat: number, lng: number) => vo
       onChange(e.latlng.lat, e.latlng.lng)
     },
   })
+  return null
+}
+
+function FlyTo({ lat, lng }: { lat: number | null; lng: number | null }) {
+  const map = useMap()
+  useEffect(() => {
+    if (lat != null && lng != null) {
+      map.flyTo([lat, lng], 16, { duration: 1 })
+    }
+  }, [lat, lng, map])
   return null
 }
 
@@ -68,6 +78,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
         <MapContainer center={center} zoom={13} className="h-full w-full" zoomControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
           <ClickCapture onChange={onChange} />
+          <FlyTo lat={lat} lng={lng} />
           {lat != null && lng != null && <Marker position={[lat, lng]} icon={pin} />}
         </MapContainer>
       </div>
