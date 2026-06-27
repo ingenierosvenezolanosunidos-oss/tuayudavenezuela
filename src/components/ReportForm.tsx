@@ -336,7 +336,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio' 
                 <div className="mt-2 flex gap-3">
                   <label className="cursor-pointer text-sm font-medium text-brand">
                     + Foto de lista
-                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => {
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                       const f = e.target.files?.[0]
                       if (!f) return
                       setListas([...listas, { tipo: 'foto', file: f, preview: URL.createObjectURL(f), descripcion: '' }])
@@ -435,7 +435,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio' 
           {/* ── Foto ── */}
           <div>
             <label className="mb-1 block text-sm font-semibold text-gray-700">Foto (opcional)</label>
-            <input type="file" accept="image/*" capture="environment" onChange={onFile} className="text-sm" />
+            <input type="file" accept="image/*" onChange={onFile} className="text-sm" />
             {fotoPreview && <img src={fotoPreview} alt="Vista previa" className="mt-2 h-40 w-full rounded-xl object-cover" />}
           </div>
 
