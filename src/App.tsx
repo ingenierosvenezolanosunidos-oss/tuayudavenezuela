@@ -60,7 +60,7 @@ const NAV_ITEMS: { id: ViewMode; label: string; icon: ReactNode }[] = [
 ]
 
 export default function App() {
-  const { reports, source, cachedAt, offline, refresh } = useReports()
+  const { reports, offline } = useReports()
   const [extra, setExtra] = useState<Report[]>([])
   const [overrides, setOverrides] = useState<Record<string, Partial<Report>>>({})
   // Single active layer — null means "all" (initial state shows all, same experience)
@@ -168,7 +168,6 @@ export default function App() {
     setActiveLayer(null)
   }
 
-  const stale = offline || source === 'cache' || source === 'dummy'
   const isServicios = view === 'servicios'
 
   // active set derived from single layer (for MapView / LayerToggle).
