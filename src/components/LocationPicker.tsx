@@ -76,8 +76,10 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
     try {
       // Photon (OSM-based) instead of Nominatim: Nominatim stopped sending CORS
       // headers, so browser requests to it are blocked. Photon allows CORS. We
-      // bias results toward Venezuela and prefer matches inside the country.
-      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lat=${CARACAS_CENTER[0]}&lon=${CARACAS_CENTER[1]}`
+      // restrict results to Venezuela's bounding box (minLon,minLat,maxLon,maxLat)
+      // and bias toward Caracas, then prefer matches inside the country.
+      const VE_BBOX = '-73.4,0.6,-59.8,12.2'
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lat=${CARACAS_CENTER[0]}&lon=${CARACAS_CENTER[1]}&bbox=${VE_BBOX}`
       const res = await fetch(url)
       const data = await res.json()
       type Feature = { geometry: { coordinates: [number, number] }; properties?: { countrycode?: string } }
