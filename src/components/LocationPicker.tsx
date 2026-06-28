@@ -74,16 +74,23 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
     setSearching(true)
     setError(null)
     try {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=ve&format=json&limit=1`
-      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } })
+      // Photon (OSM-based) instead of Nominatim: Nominatim stopped sending CORS
+      // headers, so browser requests to it are blocked. Photon allows CORS. We
+      // bias results toward Venezuela and prefer matches inside the country.
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lat=${CARACAS_CENTER[0]}&lon=${CARACAS_CENTER[1]}`
+      const res = await fetch(url)
       const data = await res.json()
-      if (!data.length) {
+      type Feature = { geometry: { coordinates: [number, number] }; properties?: { countrycode?: string } }
+      const features: Feature[] = data.features ?? []
+      const best = features.find((f) => f.properties?.countrycode === 'VE') ?? features[0]
+      if (!best) {
         setError(t('location_picker.error_not_found'))
         setSearching(false)
         return
       }
-      const { lat: rlat, lon: rlng } = data[0]
-      const coords: [number, number] = [parseFloat(rlat), parseFloat(rlng)]
+      // GeoJSON coordinates are [lon, lat] — flip to [lat, lng].
+      const [flon, flat] = best.geometry.coordinates
+      const coords: [number, number] = [flat, flon]
       onChange(coords[0], coords[1])
       setFlyTarget(coords)
     } catch {
