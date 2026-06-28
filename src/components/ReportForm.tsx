@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import type { Nivel, Report, Tipo } from '../types'
 import { LAYERS, PERSONA_ESTADOS, HOSPITAL_ESTADOS, HOSPITAL_TIPOS, HOSPITAL_NECESIDADES_PRESET, REFUGIO_ESTADOS } from '../layers'
-import { submitReport, type DraftReport } from '../lib/submit'
+import { submitReport, updateReport, type DraftReport } from '../lib/submit'
 import LocationPicker from './LocationPicker'
 
 interface Props {
   onClose: () => void
   onCreated: (r: Report) => void
   initialTipo?: Tipo
+  initialReport?: Report
 }
 
 const NIVELES: Nivel[] = ['urgente', 'medio', 'bajo', 'disponible']
@@ -39,30 +40,50 @@ export const EMERGENCIA_CATS = [
 
 const EMERGENCIA_GROUPS = ['Emergencias activas', 'Infraestructura'] as const
 
-export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio' }: Props) {
-  const [tipo, setTipo] = useState<Tipo>(initialTipo)
-  const [nombre, setNombre] = useState('')
-  const [descripcion, setDescripcion] = useState('')
-  const [lat, setLat] = useState<number | null>(null)
-  const [lng, setLng] = useState<number | null>(null)
-  const [foto, setFoto] = useState<File | null>(null)
-  const [fotoPreview, setFotoPreview] = useState<string | null>(null)
+export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio', initialReport }: Props) {
+  const editing = Boolean(initialReport)
 
-  const [horario, setHorario] = useState('')
-  const [contacto, setContacto] = useState('')
-  const [zona, setZona] = useState('')
-  const [duracion, setDuracion] = useState('')
-  const [capacidad, setCapacidad] = useState('')
-  const [telefono, setTelefono] = useState('')
-  const [tipoCentro, setTipoCentro] = useState<string>(HOSPITAL_TIPOS[0])
-  const [hospitalEstado, setHospitalEstado] = useState('abierto')
-  const [refugioEstado, setRefugioEstado] = useState('abierto')
-  const [emergenciaCat, setEmergenciaCat] = useState<string>(EMERGENCIA_CATS[0].value)
-  const [ultimaVez, setUltimaVez] = useState('')
-  const [personaEstado, setPersonaEstado] = useState('buscando')
-  const [necesidades, setNecesidades] = useState([emptyNeed()])
-  const [aceptaText, setAceptaText] = useState('')
-  const [pacientes, setPacientes] = useState([emptyPaciente()])
+  const [tipo, setTipo] = useState<Tipo>(initialReport?.tipo ?? initialTipo)
+  const [nombre, setNombre] = useState(initialReport?.nombre ?? '')
+  const [descripcion, setDescripcion] = useState(initialReport?.descripcion ?? '')
+  const [lat, setLat] = useState<number | null>(initialReport?.lat ?? null)
+  const [lng, setLng] = useState<number | null>(initialReport?.lng ?? null)
+  const [foto, setFoto] = useState<File | null>(null)
+  const [fotoPreview, setFotoPreview] = useState<string | null>(initialReport?.foto_url ?? null)
+
+  const [horario, setHorario] = useState(initialReport?.horario ?? '')
+  const [contacto, setContacto] = useState(initialReport?.contacto ?? '')
+  const [zona, setZona] = useState(initialReport?.zona ?? '')
+  const [duracion, setDuracion] = useState(initialReport?.duracion ?? '')
+  const [capacidad, setCapacidad] = useState(initialReport?.capacidad ?? '')
+  const [telefono, setTelefono] = useState(initialReport?.telefono ?? '')
+  const [tipoCentro, setTipoCentro] = useState<string>(initialReport?.tipo_centro ?? HOSPITAL_TIPOS[0])
+  const [hospitalEstado, setHospitalEstado] = useState(
+    initialReport?.tipo === 'hospital' ? (initialReport.estado ?? 'abierto') : 'abierto'
+  )
+  const [refugioEstado, setRefugioEstado] = useState(
+    initialReport?.tipo === 'refugio' ? (initialReport.estado ?? 'abierto') : 'abierto'
+  )
+  const [emergenciaCat, setEmergenciaCat] = useState<string>(
+    initialReport?.tipo === 'emergencia' ? (initialReport.tipo_centro ?? EMERGENCIA_CATS[0].value) : EMERGENCIA_CATS[0].value
+  )
+  const [ultimaVez, setUltimaVez] = useState(initialReport?.personas?.[0]?.ultima_vez_visto ?? '')
+  const [personaEstado, setPersonaEstado] = useState(
+    initialReport?.tipo === 'personas' ? (initialReport.estado ?? 'buscando') : 'buscando'
+  )
+  const [necesidades, setNecesidades] = useState(
+    initialReport?.necesidades?.length
+      ? initialReport.necesidades.map(n => ({ nombre: n.nombre, nivel: n.nivel }))
+      : [emptyNeed()]
+  )
+  const [aceptaText, setAceptaText] = useState(
+    initialReport?.acepta?.map(a => a.item).join(', ') ?? ''
+  )
+  const [pacientes, setPacientes] = useState(
+    initialReport?.pacientes?.length
+      ? initialReport.pacientes.map(p => ({ nombre: p.nombre, fecha_ingreso: p.fecha_ingreso }))
+      : [emptyPaciente()]
+  )
   const [listas, setListas] = useState<ListaDraft[]>([])
 
   const [submitting, setSubmitting] = useState(false)
@@ -140,8 +161,10 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio' 
 
     setSubmitting(true)
     try {
-      const created = await submitReport(draft)
-      onCreated(created)
+      const result = editing && initialReport
+        ? await updateReport(initialReport.id, draft, initialReport)
+        : await submitReport(draft)
+      onCreated(result)
     } catch (err) {
       setError('No se pudo enviar. Intenta de nuevo.')
       console.error(err)
@@ -166,7 +189,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio' 
                 {activeLayer.glyph}
               </span>
             )}
-            <h2 className="text-lg font-bold text-gray-900">Crear publicación</h2>
+            <h2 className="text-lg font-bold text-gray-900">{editing ? 'Editar publicación' : 'Crear publicación'}</h2>
           </div>
           <button onClick={onClose} aria-label="Cerrar" className="text-2xl leading-none text-gray-400 hover:text-gray-600">✕</button>
         </header>
@@ -454,7 +477,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio' 
             disabled={submitting}
             className="w-full rounded-xl bg-brand py-3.5 font-bold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:opacity-60"
           >
-            {submitting ? 'Publicando…' : '＋ Crear'}
+            {submitting ? (editing ? 'Guardando…' : 'Publicando…') : editing ? '✓ Guardar cambios' : '＋ Crear'}
           </button>
         </footer>
       </div>

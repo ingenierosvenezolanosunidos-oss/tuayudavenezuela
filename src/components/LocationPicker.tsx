@@ -40,7 +40,9 @@ function FlyTo({ target }: { target: [number, number] | null }) {
 export default function LocationPicker({ lat, lng, onChange }: Props) {
   const [locating, setLocating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [gpsTarget, setGpsTarget] = useState<[number, number] | null>(null)
+  const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null)
+  const [address, setAddress] = useState('')
+  const [searching, setSearching] = useState(false)
 
   function useGps() {
     if (!navigator.geolocation) {
@@ -53,7 +55,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
       (pos) => {
         const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude]
         onChange(coords[0], coords[1])
-        setGpsTarget(coords)
+        setFlyTarget(coords)
         setLocating(false)
       },
       () => {
@@ -64,10 +66,55 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
     )
   }
 
+  async function searchAddress() {
+    const q = address.trim()
+    if (!q) return
+    setSearching(true)
+    setError(null)
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=ve&format=json&limit=1`
+      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } })
+      const data = await res.json()
+      if (!data.length) {
+        setError('No se encontró esa dirección. Intenta con más detalle o toca el mapa.')
+        setSearching(false)
+        return
+      }
+      const { lat: rlat, lon: rlng } = data[0]
+      const coords: [number, number] = [parseFloat(rlat), parseFloat(rlng)]
+      onChange(coords[0], coords[1])
+      setFlyTarget(coords)
+    } catch {
+      setError('Error al buscar la dirección. Toca el mapa para marcar.')
+    } finally {
+      setSearching(false)
+    }
+  }
+
   const center: [number, number] = CARACAS_CENTER
 
   return (
     <div>
+      {/* Address search */}
+      <div className="mb-2 flex gap-2">
+        <input
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), searchAddress())}
+          placeholder="Buscar dirección (ej: Av. Francisco de Miranda, Caracas)"
+          className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={searchAddress}
+          disabled={searching || !address.trim()}
+          className="rounded-xl bg-brand px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+        >
+          {searching ? '…' : '🔍'}
+        </button>
+      </div>
+
+      {/* GPS button */}
       <div className="mb-2 flex items-center gap-2">
         <button
           type="button"
@@ -79,14 +126,16 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
         </button>
         <span className="text-xs text-gray-500">o toca el mapa</span>
       </div>
+
       <div className="h-48 overflow-hidden rounded-lg border">
         <MapContainer center={center} zoom={13} className="h-full w-full" zoomControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
           <ClickCapture onChange={onChange} />
-          <FlyTo target={gpsTarget} />
+          <FlyTo target={flyTarget} />
           {lat != null && lng != null && <Marker position={[lat, lng]} icon={pin} />}
         </MapContainer>
       </div>
+
       {lat != null && lng != null && (
         <div className="mt-1 text-xs text-gray-500">
           Ubicación: {lat.toFixed(5)}, {lng.toFixed(5)}

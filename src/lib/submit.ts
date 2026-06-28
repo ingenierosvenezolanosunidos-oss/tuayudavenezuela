@@ -194,6 +194,120 @@ export async function updatePersonaLocalizada(
   })
 }
 
+// Actualiza un reporte existente (campos escalares + relaciones).
+// En modo demo (sin Supabase) devuelve el reporte fusionado localmente.
+export async function updateReport(id: string, draft: DraftReport, existingReport: Report): Promise<Report> {
+  if (!SUPABASE_ENABLED) {
+    return {
+      ...existingReport,
+      nombre: draft.nombre,
+      descripcion: draft.descripcion,
+      estado: draft.estado,
+      lat: draft.lat,
+      lng: draft.lng,
+      horario: draft.horario,
+      contacto: draft.contacto,
+      zona: draft.zona,
+      duracion: draft.duracion,
+      capacidad: draft.capacidad,
+      telefono: draft.telefono,
+      tipo_centro: draft.tipo_centro,
+      necesidades: (draft.necesidades ?? []).map((n, i) => ({
+        id: `local-n-${i}`,
+        report_id: id,
+        nombre: n.nombre,
+        nivel: n.nivel,
+      })),
+      acepta: (draft.acepta ?? []).map((item, i) => ({
+        id: `local-a-${i}`,
+        report_id: id,
+        item,
+      })),
+      personas: draft.ultima_vez_visto
+        ? [{
+            id: existingReport.personas?.[0]?.id ?? 'local-per',
+            report_id: id,
+            foto_url: draft.foto ? URL.createObjectURL(draft.foto) : existingReport.personas?.[0]?.foto_url ?? null,
+            ultima_vez_visto: draft.ultima_vez_visto,
+            descripcion: draft.descripcion,
+          }]
+        : existingReport.personas ?? [],
+      pacientes: (draft.pacientes ?? []).map((p, i) => ({
+        id: `local-pac-${i}`,
+        report_id: id,
+        nombre: p.nombre,
+        condicion: '',
+        fecha_ingreso: p.fecha_ingreso,
+      })),
+    }
+  }
+
+  let foto_url: string | null = existingReport.foto_url ?? null
+  if (draft.foto) foto_url = await uploadPhoto(draft.foto)
+
+  const sb = await getSupabase()
+
+  // Update scalar fields on the report row
+  const { error: updateErr } = await sb.from('reports').update({
+    nombre: draft.nombre,
+    descripcion: draft.descripcion,
+    estado: draft.estado,
+    lat: draft.lat,
+    lng: draft.lng,
+    foto_url,
+    horario: draft.horario ?? null,
+    contacto: draft.contacto ?? null,
+    zona: draft.zona ?? null,
+    duracion: draft.duracion ?? null,
+    capacidad: draft.capacidad ?? null,
+    telefono: draft.telefono ?? null,
+    tipo_centro: draft.tipo_centro ?? null,
+  }).eq('id', id)
+  if (updateErr) throw updateErr
+
+  // Replace relational data (delete + insert pattern)
+  if (draft.necesidades !== undefined) {
+    await sb.from('necesidades').delete().eq('report_id', id)
+    if (draft.necesidades.length > 0) {
+      await sb.from('necesidades').insert(draft.necesidades.map(n => ({ report_id: id, nombre: n.nombre, nivel: n.nivel })))
+    }
+  }
+  if (draft.acepta !== undefined) {
+    await sb.from('acepta').delete().eq('report_id', id)
+    if (draft.acepta.length > 0) {
+      await sb.from('acepta').insert(draft.acepta.map(item => ({ report_id: id, item })))
+    }
+  }
+  if (draft.ultima_vez_visto !== undefined) {
+    await sb.from('personas').delete().eq('report_id', id)
+    await sb.from('personas').insert({ report_id: id, ultima_vez_visto: draft.ultima_vez_visto ?? '', descripcion: draft.descripcion, foto_url })
+  }
+  if (draft.pacientes !== undefined) {
+    await sb.from('pacientes').delete().eq('report_id', id)
+    if (draft.pacientes.length > 0) {
+      await sb.from('pacientes').insert(draft.pacientes.map(p => ({ report_id: id, nombre: p.nombre, fecha_ingreso: p.fecha_ingreso })))
+    }
+  }
+
+  // Return merged report for immediate UI update
+  return {
+    ...existingReport,
+    nombre: draft.nombre,
+    descripcion: draft.descripcion,
+    estado: draft.estado,
+    lat: draft.lat,
+    lng: draft.lng,
+    foto_url,
+    horario: draft.horario,
+    contacto: draft.contacto,
+    zona: draft.zona,
+    duracion: draft.duracion,
+    capacidad: draft.capacidad,
+    telefono: draft.telefono,
+    tipo_centro: draft.tipo_centro,
+  }
+}
+
 // Reporta un contenido como obsceno, falso, duplicado, etc. (moderación).
 // Pasa por la Edge Function para incluir reCAPTCHA y evitar spam en la tabla.
 export async function reportarContenido(

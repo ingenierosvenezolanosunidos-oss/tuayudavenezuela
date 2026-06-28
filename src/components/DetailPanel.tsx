@@ -18,6 +18,7 @@ interface Props {
   onClose: () => void
   onUpdateEstado: (report: Report, estado: string) => void
   onLocalizar: (report: Report, data: LocalizacionData) => void
+  onEdit: (report: Report) => void
 }
 
 function Field({ label, value }: { label: string; value?: string }) {
@@ -290,7 +291,7 @@ function CategoryBody({
   }
 }
 
-export default function DetailPanel({ report, onClose, onUpdateEstado, onLocalizar }: Props) {
+export default function DetailPanel({ report, onClose, onUpdateEstado, onLocalizar, onEdit }: Props) {
   const [localizarOpen, setLocalizarOpen] = useState(false)
   const [reportarOpen, setReportarOpen] = useState(false)
   const [eliminarOpen, setEliminarOpen] = useState(false)
@@ -326,6 +327,14 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
             </div>
             <h2 className="truncate text-lg font-bold text-white">{report.nombre}</h2>
           </div>
+          <button
+            onClick={() => onEdit(report)}
+            aria-label="Editar"
+            className="rounded-full bg-white/20 px-2 py-1 text-sm leading-none text-white"
+            title="Editar publicación"
+          >
+            ✏️
+          </button>
           <button
             onClick={onClose}
             aria-label="Cerrar"

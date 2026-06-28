@@ -68,6 +68,7 @@ export default function App() {
   const [view, setView] = useState<ViewMode>('mapa')
   const [selected, setSelected] = useState<Report | null>(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [editReport, setEditReport] = useState<Report | null>(null)
   const [servicioFormOpen, setServicioFormOpen] = useState(false)
   const [infoOpen, setInfoOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -170,6 +171,13 @@ export default function App() {
 
   const isServicios = view === 'servicios'
 
+  function goHome() {
+    setView('mapa')
+    setActiveLayer(null)
+    setSelected(null)
+    setQuery('')
+  }
+
   // active set derived from single layer (for MapView / LayerToggle).
   // When emergencia is selected, also include legacy infra records.
   const activeSet = useMemo(() => {
@@ -190,7 +198,7 @@ export default function App() {
       {/* ── DESKTOP SIDEBAR ─────────────────────────────── */}
       <aside className="hidden lg:flex lg:w-72 lg:shrink-0 lg:flex-col lg:border-r lg:border-gray-100 lg:bg-white">
 
-        <div className="flex items-center gap-3 px-5 py-4">
+        <button onClick={goHome} className="flex items-center gap-3 px-5 py-4 text-left hover:opacity-80 transition-opacity">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-xl border border-gray-100">
             🇻🇪
           </span>
@@ -202,7 +210,7 @@ export default function App() {
             </h1>
             <p className="text-[11px] text-gray-400">Ayuda comunitaria · Sin registro</p>
           </div>
-        </div>
+        </button>
 
         <div className="flex h-1 w-full shrink-0">
           <div className="flex-1" style={{ backgroundColor: '#FCD116' }} />
@@ -310,14 +318,14 @@ export default function App() {
 
         {/* Mobile header */}
         <header className="relative z-10 flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-3 shadow-sm lg:hidden">
-          <div className="flex items-center gap-2">
+          <button onClick={goHome} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <span className="text-xl">🇻🇪</span>
             <h1 className="text-[15px] font-bold tracking-tight">
               <span style={{ color: '#D4A017' }}>tu</span>
               <span style={{ color: '#003893' }}>Ayuda</span>
               <span style={{ color: '#CF142B' }}>Venezuela</span>
             </h1>
-          </div>
+          </button>
           <div className="flex items-center gap-2">
             <div className="flex overflow-hidden rounded-lg border border-gray-200">
               <button onClick={() => setScaleIdx((i) => Math.max(0, i - 1))} disabled={scaleIdx === 0} className="px-2 py-1.5 text-xs font-bold text-gray-600 disabled:opacity-40" aria-label="Reducir texto">A−</button>
@@ -469,16 +477,25 @@ export default function App() {
         onClose={() => setSelected(null)}
         onUpdateEstado={handleUpdateEstado}
         onLocalizar={handleLocalizar}
+        onEdit={(r) => { setEditReport(r); setFormOpen(true) }}
       />
 
       {formOpen && (
         <ReportForm
-          onClose={() => setFormOpen(false)}
+          onClose={() => { setFormOpen(false); setEditReport(null) }}
+          initialReport={editReport ?? undefined}
           onCreated={(r) => {
-            setExtra((prev) => [r, ...prev])
-            setActiveLayer(r.tipo)
+            if (editReport) {
+              // Update the report in place via overrides
+              setOverrides((prev) => ({ ...prev, [r.id]: r }))
+              setSelected(r)
+            } else {
+              setExtra((prev) => [r, ...prev])
+              setActiveLayer(r.tipo)
+              setSelected(r)
+            }
             setFormOpen(false)
-            setSelected(r)
+            setEditReport(null)
           }}
         />
       )}
