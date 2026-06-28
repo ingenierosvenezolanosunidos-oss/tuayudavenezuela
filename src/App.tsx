@@ -324,7 +324,7 @@ export default function App() {
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
 
         {/* Mobile header */}
-        <header className="relative z-10 flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-3 shadow-sm lg:hidden">
+        <header className="relative z-30 flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-3 shadow-sm lg:hidden">
           <button onClick={goHome} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <span className="text-xl">🇻🇪</span>
             <h1 className="text-[15px] font-bold tracking-tight">
