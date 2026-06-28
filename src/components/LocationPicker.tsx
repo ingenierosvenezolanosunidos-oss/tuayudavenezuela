@@ -91,7 +91,8 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
     }
   }
 
-  const center: [number, number] = CARACAS_CENTER
+  const center: [number, number] = lat != null && lng != null ? [lat, lng] : CARACAS_CENTER
+  const initialZoom = lat != null && lng != null ? 15 : 13
 
   return (
     <div>
@@ -132,7 +133,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
         </div>
 
         <div className="h-64 overflow-hidden rounded-lg border">
-          <MapContainer center={center} zoom={13} className="h-full w-full" zoomControl={false}>
+          <MapContainer center={center} zoom={initialZoom} className="h-full w-full" zoomControl={false}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
             <ClickCapture onChange={onChange} />
             <FlyTo target={flyTarget} />

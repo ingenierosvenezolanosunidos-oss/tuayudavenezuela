@@ -1,8 +1,19 @@
-import { MapContainer, TileLayer, Marker, Circle } from 'react-leaflet'
+import { useEffect } from 'react'
+import { MapContainer, TileLayer, Marker, Circle, useMap } from 'react-leaflet'
 import type { Report, Tipo } from '../types'
 import { CARACAS_CENTER } from '../data/dummy'
 import { pinIcon } from './markers'
 import { LAYER_BY_ID } from '../layers'
+
+function FitBounds({ reports }: { reports: Report[] }) {
+  const map = useMap()
+  useEffect(() => {
+    if (reports.length === 0) return
+    const bounds: [number, number][] = reports.map((r) => [r.lat, r.lng])
+    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14, animate: true })
+  }, [reports, map])
+  return null
+}
 
 interface Props {
   reports: Report[]
@@ -40,6 +51,7 @@ export default function MapView({ reports, active, onSelect }: Props) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         maxZoom={19}
       />
+      <FitBounds reports={visible} />
 
       {/* Necesidades heatmap-style overlay: translucent circles sized by urgency */}
       {zonas.map((r) => {
