@@ -242,51 +242,45 @@ export async function updateReport(id: string, draft: DraftReport, existingRepor
     }
   }
 
+  // Photo upload still happens client → Storage (anon has insert on the bucket),
+  // then we pass the URL to the Edge Function. All table writes go through the
+  // function with the service_role_key, because RLS blocks UPDATE/DELETE/INSERT
+  // from the anon client (a blocked update returns 0 rows with NO error, which
+  // silently dropped edits before).
   let foto_url: string | null = existingReport.foto_url ?? null
   if (draft.foto) foto_url = await uploadPhoto(draft.foto)
 
-  const sb = await getSupabase()
+  const recaptchaToken = await getRecaptchaToken('update')
 
-  // Update scalar fields on the report row
-  const { error: updateErr } = await sb.from('reports').update({
-    nombre: draft.nombre,
-    descripcion: draft.descripcion,
-    estado: draft.estado,
-    lat: draft.lat,
-    lng: draft.lng,
-    foto_url,
-    horario: draft.horario ?? null,
-    contacto: draft.contacto ?? null,
-    zona: draft.zona ?? null,
-    duracion: draft.duracion ?? null,
-    capacidad: draft.capacidad ?? null,
-    telefono: draft.telefono ?? null,
-    tipo_centro: draft.tipo_centro ?? null,
-  }).eq('id', id)
-  if (updateErr) throw updateErr
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/update-report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+    body: JSON.stringify({
+      recaptchaToken,
+      id,
+      nombre: draft.nombre,
+      descripcion: draft.descripcion,
+      estado: draft.estado,
+      lat: draft.lat,
+      lng: draft.lng,
+      foto_url,
+      horario: draft.horario ?? null,
+      contacto: draft.contacto ?? null,
+      zona: draft.zona ?? null,
+      duracion: draft.duracion ?? null,
+      capacidad: draft.capacidad ?? null,
+      telefono: draft.telefono ?? null,
+      tipo_centro: draft.tipo_centro ?? null,
+      ultima_vez_visto: draft.ultima_vez_visto,
+      necesidades: draft.necesidades,
+      acepta: draft.acepta,
+      pacientes: draft.pacientes,
+    }),
+  })
 
-  // Replace relational data (delete + insert pattern)
-  if (draft.necesidades !== undefined) {
-    await sb.from('necesidades').delete().eq('report_id', id)
-    if (draft.necesidades.length > 0) {
-      await sb.from('necesidades').insert(draft.necesidades.map(n => ({ report_id: id, nombre: n.nombre, nivel: n.nivel })))
-    }
-  }
-  if (draft.acepta !== undefined) {
-    await sb.from('acepta').delete().eq('report_id', id)
-    if (draft.acepta.length > 0) {
-      await sb.from('acepta').insert(draft.acepta.map(item => ({ report_id: id, item })))
-    }
-  }
-  if (draft.ultima_vez_visto !== undefined) {
-    await sb.from('personas').delete().eq('report_id', id)
-    await sb.from('personas').insert({ report_id: id, ultima_vez_visto: draft.ultima_vez_visto ?? '', descripcion: draft.descripcion, foto_url })
-  }
-  if (draft.pacientes !== undefined) {
-    await sb.from('pacientes').delete().eq('report_id', id)
-    if (draft.pacientes.length > 0) {
-      await sb.from('pacientes').insert(draft.pacientes.map(p => ({ report_id: id, nombre: p.nombre, fecha_ingreso: p.fecha_ingreso })))
-    }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error ?? `HTTP ${res.status}`)
   }
 
   // Return merged report for immediate UI update
