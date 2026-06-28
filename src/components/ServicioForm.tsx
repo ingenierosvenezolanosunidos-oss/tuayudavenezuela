@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Report } from '../types'
 import { submitReport } from '../lib/submit'
+import LocationPicker from './LocationPicker'
 
 interface Props {
   onClose: () => void
@@ -32,6 +33,8 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
   const [zona, setZona] = useState('')
   const [contacto, setContacto] = useState('')
   const [horario, setHorario] = useState('')
+  const [lat, setLat] = useState<number | null>(null)
+  const [lng, setLng] = useState<number | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -48,8 +51,8 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
         nombre: nombre.trim(),
         descripcion: descripcion.trim(),
         estado: 'disponible',
-        lat: VE_LAT,
-        lng: VE_LNG,
+        lat: lat ?? VE_LAT,
+        lng: lng ?? VE_LNG,
         zona: zona.trim(),
         contacto: contacto.trim() || undefined,
         horario: horario.trim() || undefined,
@@ -142,6 +145,12 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
               placeholder="Ej: Petare, Caracas · Maracaibo · Valencia"
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
             />
+          </div>
+
+          {/* Ubicación en el mapa */}
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">Ubicación en el mapa (opcional)</label>
+            <LocationPicker lat={lat} lng={lng} onChange={(la, ln) => { setLat(la); setLng(ln) }} />
           </div>
 
           {/* Contacto */}

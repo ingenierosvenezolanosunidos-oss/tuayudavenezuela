@@ -114,34 +114,39 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
         </button>
       </div>
 
-      {/* GPS button */}
-      <div className="mb-2 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={useGps}
-          className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-          disabled={locating}
-        >
-          {locating ? 'Ubicando…' : '📍 Usar mi ubicación'}
-        </button>
-        <span className="text-xs text-gray-500">o toca el mapa</span>
-      </div>
-
-      <div className="h-48 overflow-hidden rounded-lg border">
-        <MapContainer center={center} zoom={13} className="h-full w-full" zoomControl={false}>
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
-          <ClickCapture onChange={onChange} />
-          <FlyTo target={flyTarget} />
-          {lat != null && lng != null && <Marker position={[lat, lng]} icon={pin} />}
-        </MapContainer>
-      </div>
-
-      {lat != null && lng != null && (
-        <div className="mt-1 text-xs text-gray-500">
-          Ubicación: {lat.toFixed(5)}, {lng.toFixed(5)}
+      {/* GPS + map — same action: place the pin */}
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+          Coloca el punto en el mapa
+        </p>
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={useGps}
+            className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
+            disabled={locating}
+          >
+            {locating ? 'Ubicando…' : '📍 Usar mi ubicación'}
+          </button>
+          <span className="text-xs text-gray-500">o toca directamente el mapa</span>
         </div>
-      )}
-      {error && <div className="mt-1 text-xs text-hospital">{error}</div>}
+
+        <div className="h-64 overflow-hidden rounded-lg border">
+          <MapContainer center={center} zoom={13} className="h-full w-full" zoomControl={false}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
+            <ClickCapture onChange={onChange} />
+            <FlyTo target={flyTarget} />
+            {lat != null && lng != null && <Marker position={[lat, lng]} icon={pin} />}
+          </MapContainer>
+        </div>
+
+        {lat != null && lng != null && (
+          <div className="mt-1 text-xs text-gray-500">
+            Ubicación: {lat.toFixed(5)}, {lng.toFixed(5)}
+          </div>
+        )}
+        {error && <div className="mt-1 text-xs text-hospital">{error}</div>}
+      </div>
     </div>
   )
 }
