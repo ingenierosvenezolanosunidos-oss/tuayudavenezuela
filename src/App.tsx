@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Report, Tipo } from './types'
 import { LAYERS } from './layers'
 import { useReports } from './lib/useReports'
@@ -12,6 +13,7 @@ import PersonasStats from './components/PersonasStats'
 import DetailPanel from './components/DetailPanel'
 import ReportForm from './components/ReportForm'
 import InfoModal from './components/InfoModal'
+import LanguageSwitcher from './components/LanguageSwitcher'
 import { updatePersonaEstado, updatePersonaLocalizada } from './lib/submit'
 import type { LocalizacionData } from './components/LocalizarModal'
 
@@ -22,10 +24,11 @@ const TEXT_SCALES = [14, 16, 18, 20]
 
 const INITIAL_SHARED_ID = new URLSearchParams(window.location.search).get('reporte')
 
-const NAV_ITEMS: { id: ViewMode; label: string; icon: ReactNode }[] = [
+// Nav items use translation keys resolved inside the component
+const NAV_ICONS: { id: ViewMode; tkey: string; icon: ReactNode }[] = [
   {
     id: 'mapa',
-    label: 'Mapa',
+    tkey: 'nav.map',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
@@ -36,7 +39,7 @@ const NAV_ITEMS: { id: ViewMode; label: string; icon: ReactNode }[] = [
   },
   {
     id: 'lista',
-    label: 'Lista',
+    tkey: 'nav.list',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
         <line x1="9" y1="6" x2="21" y2="6" />
@@ -50,7 +53,7 @@ const NAV_ITEMS: { id: ViewMode; label: string; icon: ReactNode }[] = [
   },
   {
     id: 'servicios',
-    label: 'Servicios',
+    tkey: 'nav.services',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
@@ -60,7 +63,10 @@ const NAV_ITEMS: { id: ViewMode; label: string; icon: ReactNode }[] = [
 ]
 
 export default function App() {
+  const { t } = useTranslation()
   const { reports, offline } = useReports()
+
+  const NAV_ITEMS = NAV_ICONS.map((item) => ({ ...item, label: t(item.tkey) }))
   const [extra, setExtra] = useState<Report[]>([])
   const [overrides, setOverrides] = useState<Record<string, Partial<Report>>>({})
   // Single active layer — null means "all" (initial state shows all, same experience)
@@ -208,7 +214,7 @@ export default function App() {
               <span style={{ color: '#003893' }}>Ayuda</span>
               <span style={{ color: '#CF142B' }}>Venezuela</span>
             </h1>
-            <p className="text-[11px] text-gray-400">Ayuda comunitaria · Sin registro</p>
+            <p className="text-[11px] text-gray-400">{t('app.tagline')}</p>
           </div>
         </button>
 
@@ -251,11 +257,11 @@ export default function App() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar por nombre o zona…"
+                placeholder={t('app.search_desktop')}
                 className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-9 pr-8 text-sm focus:border-brand focus:bg-white focus:outline-none"
               />
               {query && (
-                <button onClick={() => setQuery('')} aria-label="Limpiar" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">✕</button>
+                <button onClick={() => setQuery('')} aria-label={t('app.clear_search')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">✕</button>
               )}
             </div>
           </div>
@@ -264,7 +270,7 @@ export default function App() {
         {/* Layer list — vertical, includes Servicios at bottom */}
         <div className="flex-1 overflow-y-auto px-3 pb-3">
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-            {isServicios ? 'Categorías' : 'Filtrar por capa'}
+            {isServicios ? t('app.categories_label') : t('app.filter_label')}
           </p>
           <LayerToggle
             active={activeSet}
@@ -283,26 +289,27 @@ export default function App() {
             onClick={() => setInfoOpen(true)}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 py-2.5 text-sm font-semibold text-red-700 ring-1 ring-red-200 transition-colors hover:bg-red-100"
           >
-            🆘 Ayuda y emergencias
+            🆘 {t('nav.help')}
           </button>
           <div className="flex items-center justify-center gap-2">
-            <span className="text-xs text-gray-400">Texto:</span>
+            <span className="text-xs text-gray-400">{t('app.text_size')}</span>
             <div className="flex overflow-hidden rounded-lg border border-gray-200">
-              <button onClick={() => setScaleIdx((i) => Math.max(0, i - 1))} disabled={scaleIdx === 0} className="px-3 py-1 text-xs font-bold text-gray-600 disabled:opacity-40 hover:bg-gray-50" aria-label="Reducir texto">A−</button>
-              <button onClick={() => setScaleIdx((i) => Math.min(TEXT_SCALES.length - 1, i + 1))} disabled={scaleIdx === TEXT_SCALES.length - 1} className="border-l border-gray-200 px-3 py-1 text-sm font-bold text-gray-600 disabled:opacity-40 hover:bg-gray-50" aria-label="Aumentar texto">A+</button>
+              <button onClick={() => setScaleIdx((i) => Math.max(0, i - 1))} disabled={scaleIdx === 0} className="px-3 py-1 text-xs font-bold text-gray-600 disabled:opacity-40 hover:bg-gray-50" aria-label={t('app.reduce_text')}>A−</button>
+              <button onClick={() => setScaleIdx((i) => Math.min(TEXT_SCALES.length - 1, i + 1))} disabled={scaleIdx === TEXT_SCALES.length - 1} className="border-l border-gray-200 px-3 py-1 text-sm font-bold text-gray-600 disabled:opacity-40 hover:bg-gray-50" aria-label={t('app.increase_text')}>A+</button>
             </div>
+            <LanguageSwitcher />
           </div>
         </div>
 
         {/* Disclaimer footer */}
         <div className="border-t border-gray-100 px-4 py-3 bg-gray-50">
           <p className="text-[10px] leading-relaxed text-gray-400 text-center">
-            Sistema desarrollado por venezolanos para apoyarnos en la organización y centralización de información e insumos.{' '}
-            <strong className="text-gray-500">No pedimos dinero.</strong>{' '}
-            No somos responsables de los servicios publicados por terceros — somos un punto de encuentro para quienes necesitan y ofrecen ayuda.
+            {t('app.disclaimer_built')}{' '}
+            <strong className="text-gray-500">{t('app.no_money')}</strong>{' '}
+            {t('app.no_liability')}
           </p>
           <p className="mt-1.5 text-[10px] leading-relaxed text-gray-400 text-center">
-            Fallas o consultas:{' '}
+            {t('app.contact_label')}{' '}
             <a
               href="mailto:ingenierosvenezolanosunidos@gmail.com"
               className="text-[#003893] underline break-all hover:text-[#CF142B] transition-colors"
@@ -328,13 +335,14 @@ export default function App() {
           </button>
           <div className="flex items-center gap-2">
             <div className="flex overflow-hidden rounded-lg border border-gray-200">
-              <button onClick={() => setScaleIdx((i) => Math.max(0, i - 1))} disabled={scaleIdx === 0} className="px-2 py-1.5 text-xs font-bold text-gray-600 disabled:opacity-40" aria-label="Reducir texto">A−</button>
-              <button onClick={() => setScaleIdx((i) => Math.min(TEXT_SCALES.length - 1, i + 1))} disabled={scaleIdx === TEXT_SCALES.length - 1} className="border-l border-gray-200 px-2 py-1.5 text-sm font-bold text-gray-600 disabled:opacity-40" aria-label="Aumentar texto">A+</button>
+              <button onClick={() => setScaleIdx((i) => Math.max(0, i - 1))} disabled={scaleIdx === 0} className="px-2 py-1.5 text-xs font-bold text-gray-600 disabled:opacity-40" aria-label={t('app.reduce_text')}>A−</button>
+              <button onClick={() => setScaleIdx((i) => Math.min(TEXT_SCALES.length - 1, i + 1))} disabled={scaleIdx === TEXT_SCALES.length - 1} className="border-l border-gray-200 px-2 py-1.5 text-sm font-bold text-gray-600 disabled:opacity-40" aria-label={t('app.increase_text')}>A+</button>
             </div>
+            <LanguageSwitcher />
             <button
               onClick={() => setInfoOpen(true)}
               className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-sm font-semibold text-red-700 ring-1 ring-red-200"
-              aria-label="Ayuda y emergencias"
+              aria-label={t('nav.help')}
             >
               🆘
             </button>
@@ -360,16 +368,16 @@ export default function App() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar por nombre, zona…"
+                placeholder={t('app.search_mobile')}
                 className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-9 pr-8 text-sm focus:border-brand focus:bg-white focus:outline-none"
               />
               {query && (
-                <button onClick={() => setQuery('')} aria-label="Limpiar búsqueda" className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">✕</button>
+                <button onClick={() => setQuery('')} aria-label={t('app.clear_search')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">✕</button>
               )}
             </div>
             <button
               onClick={() => setFiltersOpen((o) => !o)}
-              aria-label={filtersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}
+              aria-label={filtersOpen ? t('app.hide_filters') : t('app.show_filters')}
               className="flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-2 text-xs font-semibold transition-all"
               style={
                 filtersOpen || activeLayer
@@ -388,7 +396,7 @@ export default function App() {
         {/* Offline indicator */}
         {offline && (
           <div className="flex shrink-0 items-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-medium text-amber-800">
-            <span>📴 Sin conexión — mostrando datos guardados</span>
+            <span>📴 {t('app.offline')}</span>
           </div>
         )}
 
@@ -430,7 +438,7 @@ export default function App() {
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-4 text-base font-bold text-white shadow-sm transition-colors hover:bg-brand-dark active:scale-[.98]"
             >
               <span className="text-xl leading-none">＋</span>
-              <span>Crear</span>
+              <span>{t('nav.create')}</span>
             </button>
           </div>
         )}
@@ -438,8 +446,8 @@ export default function App() {
         {/* Mobile disclaimer */}
         <div className="z-10 shrink-0 border-t border-gray-100 bg-gray-50 px-4 py-2 lg:hidden">
           <p className="text-[9px] leading-relaxed text-gray-400 text-center">
-            Hecho por venezolanos. <strong className="text-gray-500">No pedimos dinero.</strong> No somos responsables de los servicios de terceros.
-            Fallas:{' '}
+            {t('app.made_by')} <strong className="text-gray-500">{t('app.no_money')}</strong> {t('app.no_liability_short')}
+            {' '}{t('app.contact_label_short')}{' '}
             <a href="mailto:ingenierosvenezolanosunidos@gmail.com" className="text-[#003893] underline">
               ingenierosvenezolanosunidos@gmail.com
             </a>

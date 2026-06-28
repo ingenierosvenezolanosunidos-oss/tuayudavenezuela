@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export interface LocalizacionData {
   localizado_por_nombre: string
@@ -13,10 +14,8 @@ interface Props {
   onConfirm: (data: LocalizacionData) => void
 }
 
-// Formulario que aparece al marcar a una persona como Localizada. Captura los
-// datos de quien la localizó, para confirmar y dar seguimiento. El contacto se
-// guarda para verificación; no se muestra públicamente en la ficha.
 export default function LocalizarModal({ nombre, onCancel, onConfirm }: Props) {
+  const { t } = useTranslation()
   const [porNombre, setPorNombre] = useState('')
   const [contacto, setContacto] = useState('')
   const [relacion, setRelacion] = useState('')
@@ -25,7 +24,7 @@ export default function LocalizarModal({ nombre, onCancel, onConfirm }: Props) {
 
   function confirm() {
     if (!porNombre.trim() || !contacto.trim()) {
-      setError('El nombre y el contacto son obligatorios.')
+      setError(t('localizar_modal.error_required'))
       return
     }
     onConfirm({
@@ -40,57 +39,58 @@ export default function LocalizarModal({ nombre, onCancel, onConfirm }: Props) {
     <div className="fixed inset-0 z-[1200] flex items-end justify-center bg-black/40 md:items-center">
       <div className="w-full max-h-[90vh] overflow-y-auto rounded-t-2xl bg-white p-4 shadow-panel md:max-w-md md:rounded-2xl">
         <div className="mb-1 flex items-start justify-between">
-          <h2 className="text-lg font-bold text-gray-900">¿Quién la localizó?</h2>
-          <button onClick={onCancel} aria-label="Cerrar" className="text-2xl leading-none text-gray-400">
+          <h2 className="text-lg font-bold text-gray-900">{t('localizar_modal.title')}</h2>
+          <button onClick={onCancel} aria-label={t('common.close')} className="text-2xl leading-none text-gray-400">
             ✕
           </button>
         </div>
         <p className="mb-4 text-sm text-gray-600">
-          Vas a marcar a <span className="font-semibold">{nombre}</span> como localizada.
-          Deja los datos de contacto de quien la localizó para confirmar y dar seguimiento.
+          {t('localizar_modal.description', { nombre })}
         </p>
 
         <div className="space-y-3">
           <div>
             <label className="mb-1 block text-sm font-semibold text-gray-700">
-              Nombre <span className="text-hospital">*</span>
+              {t('localizar_modal.field_name')} <span className="text-hospital">*</span>
             </label>
             <input
               value={porNombre}
               onChange={(e) => setPorNombre(e.target.value)}
-              placeholder="Nombre de quien la localizó"
+              placeholder={t('localizar_modal.ph_name')}
               className="w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
           <div>
             <label className="mb-1 block text-sm font-semibold text-gray-700">
-              Teléfono o contacto <span className="text-hospital">*</span>
+              {t('localizar_modal.field_contact')} <span className="text-hospital">*</span>
             </label>
             <input
               value={contacto}
               onChange={(e) => setContacto(e.target.value)}
-              placeholder="Teléfono u otra vía de contacto"
+              placeholder={t('localizar_modal.ph_contact')}
               className="w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
           <div>
             <label className="mb-1 block text-sm font-semibold text-gray-700">
-              Relación o parentesco
+              {t('localizar_modal.field_relation')}
             </label>
             <input
               value={relacion}
               onChange={(e) => setRelacion(e.target.value)}
-              placeholder="Opcional (familiar, vecino, voluntario…)"
+              placeholder={t('localizar_modal.ph_relation')}
               className="w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">Nota</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">
+              {t('localizar_modal.field_note')}
+            </label>
             <textarea
               value={nota}
               onChange={(e) => setNota(e.target.value)}
               rows={2}
-              placeholder="Opcional: dónde la vio, en qué condiciones…"
+              placeholder={t('localizar_modal.ph_note')}
               className="w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
@@ -103,13 +103,13 @@ export default function LocalizarModal({ nombre, onCancel, onConfirm }: Props) {
             onClick={onCancel}
             className="flex-1 rounded-xl border border-gray-300 py-2.5 font-semibold text-gray-700"
           >
-            Cancelar
+            {t('common.cancel')}
           </button>
           <button
             onClick={confirm}
             className="flex-1 rounded-xl bg-acopio py-2.5 font-semibold text-white"
           >
-            ✅ Confirmar
+            {t('localizar_modal.confirm')}
           </button>
         </div>
       </div>

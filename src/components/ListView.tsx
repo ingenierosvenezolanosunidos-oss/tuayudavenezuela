@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Report, Tipo } from '../types'
 import {
   LAYER_BY_ID,
@@ -48,12 +49,13 @@ interface Props {
 }
 
 export default function ListView({ reports, active, onSelect }: Props) {
+  const { t } = useTranslation()
   const visible = reports.filter((r) => active.has(r.tipo))
 
   if (visible.length === 0) {
     return (
       <div className="flex h-full items-center justify-center px-6 text-center text-gray-400 bg-white">
-        No hay reportes en las capas seleccionadas.
+        {t('list_view.empty')}
       </div>
     )
   }
@@ -84,7 +86,7 @@ export default function ListView({ reports, active, onSelect }: Props) {
                     style={{ backgroundColor: layer.color }}
                   >
                     <span style={{ fontSize: '11px' }}>{layer.glyph}</span>
-                    <span>{layer.short}</span>
+                    <span>{t(`layers.${layer.id}.short`)}</span>
                   </span>
                 </div>
 
@@ -92,7 +94,7 @@ export default function ListView({ reports, active, onSelect }: Props) {
                 <div className="absolute right-1.5 top-1.5 flex flex-col items-end gap-1">
                   {urgent && (
                     <span className="rounded-full bg-red-600 px-2 py-0.5 text-[9px] font-bold uppercase text-white shadow">
-                      Urgente
+                      {t('nivel.urgente')}
                     </span>
                   )}
                   {badge && (
@@ -100,7 +102,7 @@ export default function ListView({ reports, active, onSelect }: Props) {
                       className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase text-white shadow"
                       style={{ backgroundColor: badge.color }}
                     >
-                      {badge.label}
+                      {t(`estado.${r.tipo === 'personas' ? 'personas' : 'hospital'}.${r.estado}`, { defaultValue: badge.label })}
                     </span>
                   )}
                 </div>

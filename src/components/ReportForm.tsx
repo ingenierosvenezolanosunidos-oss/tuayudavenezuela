@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Nivel, Report, Tipo } from '../types'
 import { LAYERS, PERSONA_ESTADOS, HOSPITAL_ESTADOS, HOSPITAL_TIPOS, HOSPITAL_NECESIDADES_PRESET, REFUGIO_ESTADOS } from '../layers'
 import { submitReport, updateReport, type DraftReport } from '../lib/submit'
@@ -17,19 +18,15 @@ const emptyNeed = () => ({ nombre: '', nivel: 'medio' as Nivel })
 const emptyPaciente = () => ({ nombre: '', fecha_ingreso: '' })
 type ListaDraft = { tipo: 'foto'; file: File; preview: string; descripcion: string } | { tipo: 'link'; url: string; descripcion: string }
 
-// Excluded from the type selector — each has its own dedicated form or is legacy
 const EXCLUDED_TIPOS: Tipo[] = ['servicio', 'infra']
 
-// Unified subcategories for Emergencias + Infraestructura
 export const EMERGENCIA_CATS = [
-  // Emergencias activas
   { value: 'incendio',     label: 'Incendio',               emoji: '🔥', group: 'Emergencias activas' },
   { value: 'derrumbe',    label: 'Derrumbe / Desplome',     emoji: '🏗️', group: 'Emergencias activas' },
   { value: 'gas',         label: 'Escape de gas',           emoji: '💨', group: 'Emergencias activas' },
   { value: 'inundacion',  label: 'Inundación',              emoji: '🌊', group: 'Emergencias activas' },
   { value: 'accidente',   label: 'Accidente vial',          emoji: '🚗', group: 'Emergencias activas' },
   { value: 'inseguridad', label: 'Inseguridad / Violencia', emoji: '🔫', group: 'Emergencias activas' },
-  // Infraestructura caída
   { value: 'sin_luz',     label: 'Corte de luz',            emoji: '⚡', group: 'Infraestructura' },
   { value: 'sin_agua',    label: 'Corte de agua',           emoji: '💧', group: 'Infraestructura' },
   { value: 'sin_señal',   label: 'Sin señal telefónica',    emoji: '📵', group: 'Infraestructura' },
@@ -41,6 +38,7 @@ export const EMERGENCIA_CATS = [
 const EMERGENCIA_GROUPS = ['Emergencias activas', 'Infraestructura'] as const
 
 export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio', initialReport }: Props) {
+  const { t } = useTranslation()
   const editing = Boolean(initialReport)
 
   const [tipo, setTipo] = useState<Tipo>(initialReport?.tipo ?? initialTipo)
@@ -97,7 +95,6 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
 
   function pickEmergenciaCat(value: string) {
     setEmergenciaCat(value)
-    // Auto-fill nombre if still empty
     const cat = EMERGENCIA_CATS.find((c) => c.value === value)
     if (cat && !nombre.trim()) setNombre(cat.label)
   }
@@ -108,8 +105,8 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    if (!nombre.trim()) return setError('Indica un nombre o título.')
-    if (lat == null) return setError('Marca la ubicación en el mapa.')
+    if (!nombre.trim()) return setError(t('report_form.error_no_name'))
+    if (lat == null) return setError(t('report_form.error_no_location'))
 
     const estado =
       tipo === 'personas' ? personaEstado
@@ -166,7 +163,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
         : await submitReport(draft)
       onCreated(result)
     } catch (err) {
-      setError('No se pudo enviar. Intenta de nuevo.')
+      setError(t('common.error_generic'))
       console.error(err)
     } finally {
       setSubmitting(false)
@@ -182,27 +179,26 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
         <header className="flex shrink-0 items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             {activeLayer && (
-              <span
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-lg"
-                style={{ backgroundColor: activeLayer.color + '18' }}
-              >
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg text-lg" style={{ backgroundColor: activeLayer.color + '18' }}>
                 {activeLayer.glyph}
               </span>
             )}
-            <h2 className="text-lg font-bold text-gray-900">{editing ? 'Editar publicación' : 'Crear publicación'}</h2>
+            <h2 className="text-lg font-bold text-gray-900">
+              {editing ? t('report_form.title_edit') : t('report_form.title_create')}
+            </h2>
           </div>
-          <button onClick={onClose} aria-label="Cerrar" className="text-2xl leading-none text-gray-400 hover:text-gray-600">✕</button>
+          <button onClick={onClose} aria-label={t('common.close')} className="text-2xl leading-none text-gray-400 hover:text-gray-600">✕</button>
         </header>
 
         <form onSubmit={handleSubmit} className="flex-1 space-y-5 overflow-y-auto px-4 py-4">
           <p className="flex items-start gap-2 rounded-xl border border-brand-tint bg-brand-tint px-3 py-2 text-xs text-brand-dark">
             <span aria-hidden>🔒</span>
-            Publicación 100% anónima. No pedimos nombre, teléfono ni cuenta.
+            {t('report_form.anonymous_notice')}
           </p>
 
-          {/* ── Tipo ── */}
+          {/* Tipo */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-gray-700">Tipo de publicación</label>
+            <label className="mb-2 block text-sm font-semibold text-gray-700">{t('report_form.type_label')}</label>
             <div className="grid grid-cols-4 gap-2">
               {LAYERS.filter((l) => !EXCLUDED_TIPOS.includes(l.id)).map((l) => (
                 <button
@@ -217,19 +213,21 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
                   }
                 >
                   <span className="text-xl" aria-hidden>{l.glyph}</span>
-                  <span className="leading-tight">{l.short}</span>
+                  <span className="leading-tight">{t(`layers.${l.id}.short`)}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* ── Emergencias e Infraestructura — subcategoría ── */}
+          {/* Emergencias — subcategoría */}
           {tipo === 'emergencia' && (
             <div>
-              <label className="mb-2 block text-sm font-semibold text-gray-700">¿Qué está pasando?</label>
+              <label className="mb-2 block text-sm font-semibold text-gray-700">{t('report_form.what_happening')}</label>
               {EMERGENCIA_GROUPS.map((group) => (
                 <div key={group} className="mb-3">
-                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">{group}</p>
+                  <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    {t(`emergencia_groups.${group}`)}
+                  </p>
                   <div className="grid grid-cols-3 gap-2">
                     {EMERGENCIA_CATS.filter((c) => c.group === group).map((cat) => (
                       <button
@@ -244,7 +242,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
                         }
                       >
                         <span className="text-xl">{cat.emoji}</span>
-                        <span className="leading-tight">{cat.label}</span>
+                        <span className="leading-tight">{t(`emergencia_cats.${cat.value}`)}</span>
                       </button>
                     ))}
                   </div>
@@ -253,27 +251,27 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
             </div>
           )}
 
-          {/* ── Nombre / título ── */}
+          {/* Nombre */}
           <div>
             <label className="mb-1 block text-sm font-semibold text-gray-700">
-              {tipo === 'personas' ? 'Nombre de la persona' : 'Título'}
+              {tipo === 'personas' ? t('report_form.field_person_name') : t('report_form.field_title')}
             </label>
             <input
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-brand focus:outline-none"
               placeholder={
-                tipo === 'personas' ? 'Ej: María González'
-                : tipo === 'refugio' ? 'Ej: Refugio Iglesia San José'
-                : tipo === 'emergencia' ? 'Ej: Incendio edificio Los Palos Grandes'
-                : 'Ej: Centro de acopio Chacao'
+                tipo === 'personas' ? t('report_form.ph_persona_name')
+                : tipo === 'refugio' ? t('report_form.ph_shelter_name')
+                : tipo === 'emergencia' ? t('report_form.ph_emergency_name')
+                : t('report_form.ph_default_name')
               }
             />
           </div>
 
-          {/* ── Descripción ── */}
+          {/* Descripción */}
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">Descripción</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">{t('report_form.field_description')}</label>
             <textarea
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
@@ -281,67 +279,68 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-brand focus:outline-none"
               placeholder={
                 tipo === 'emergencia'
-                  ? 'Detalla la situación: dirección, intensidad, personas afectadas…'
-                  : 'Describe la situación con el mayor detalle posible.'
+                  ? t('report_form.ph_desc_emergency')
+                  : t('report_form.ph_desc_default')
               }
             />
           </div>
 
-          {/* ── Campos por tipo ── */}
-
+          {/* Campos por tipo */}
           {tipo === 'acopio' && (
             <>
-              <Text label="Horario" value={horario} onChange={setHorario} placeholder="Lun a Sáb, 8:00 - 17:00" />
-              <Text label="Contacto (sin datos personales)" value={contacto} onChange={setContacto} placeholder="Ej: Parroquia San José" />
+              <Text label={t('report_form.field_schedule_simple')} value={horario} onChange={setHorario} placeholder={t('report_form.ph_schedule')} />
+              <Text label={t('report_form.field_contact')} value={contacto} onChange={setContacto} placeholder={t('report_form.ph_contact')} />
             </>
           )}
 
           {tipo === 'hospital' && (
             <>
-              <EstadoGrid label="Estado operativo" estados={HOSPITAL_ESTADOS} value={hospitalEstado} onChange={setHospitalEstado} />
+              <EstadoGrid
+                label={t('report_form.hospital_status_label')}
+                estados={HOSPITAL_ESTADOS.map(e => ({ ...e, label: t(`estado.hospital.${e.value}`) }))}
+                value={hospitalEstado}
+                onChange={setHospitalEstado}
+              />
               <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">Tipo de centro</label>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">{t('report_form.field_center_type')}</label>
                 <select value={tipoCentro} onChange={(e) => setTipoCentro(e.target.value)} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm">
-                  {HOSPITAL_TIPOS.map((t) => <option key={t} value={t}>{t}</option>)}
+                  {HOSPITAL_TIPOS.map((tp) => <option key={tp} value={tp}>{t(`hospital_tipos.${tp}`, { defaultValue: tp })}</option>)}
                 </select>
               </div>
-              <Text label="Capacidad / estado" value={capacidad} onChange={setCapacidad} placeholder="Ej: UCI al 90%, emergencias abiertas" />
-              <Text label="Teléfono" value={telefono} onChange={setTelefono} placeholder="Ej: 0212-555-1234" />
-              <Text label="Contacto" value={contacto} onChange={setContacto} placeholder="Ej: Emergencias piso 1" />
+              <Text label={t('report_form.field_capacity')} value={capacidad} onChange={setCapacidad} placeholder={t('report_form.ph_capacity_hospital')} />
+              <Text label={t('report_form.field_phone')} value={telefono} onChange={setTelefono} placeholder={t('report_form.ph_phone')} />
+              <Text label={t('report_form.field_contact')} value={contacto} onChange={setContacto} placeholder={t('report_form.ph_contact_hospital')} />
               <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">Pacientes reportados</label>
-                <p className="mb-2 text-xs text-gray-500">Solo lo necesario. No incluyas datos sensibles.</p>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">{t('report_form.field_patients')}</label>
+                <p className="mb-2 text-xs text-gray-500">{t('report_form.field_patients_note')}</p>
                 <div className="space-y-3">
                   {pacientes.map((p, i) => (
                     <div key={i} className="space-y-2 rounded-xl border border-gray-200 p-3">
-                      <input value={p.nombre} onChange={(e) => { const c = [...pacientes]; c[i] = { ...c[i], nombre: e.target.value }; setPacientes(c) }} className="w-full rounded-lg border px-3 py-2 text-sm" placeholder="Nombre o referencia" />
+                      <input value={p.nombre} onChange={(e) => { const c = [...pacientes]; c[i] = { ...c[i], nombre: e.target.value }; setPacientes(c) }} className="w-full rounded-lg border px-3 py-2 text-sm" placeholder={t('report_form.ph_patient_name')} />
                       <div className="flex items-center gap-2">
-                        <label className="text-xs text-gray-500">Ingreso</label>
+                        <label className="text-xs text-gray-500">{t('report_form.patient_intake')}</label>
                         <input type="date" value={p.fecha_ingreso} onChange={(e) => { const c = [...pacientes]; c[i] = { ...c[i], fecha_ingreso: e.target.value }; setPacientes(c) }} className="flex-1 rounded-lg border px-3 py-2 text-sm" />
-                        {pacientes.length > 1 && <button type="button" onClick={() => setPacientes(pacientes.filter((_, j) => j !== i))} className="text-sm text-red-500">Quitar</button>}
+                        {pacientes.length > 1 && <button type="button" onClick={() => setPacientes(pacientes.filter((_, j) => j !== i))} className="text-sm text-red-500">{t('common.remove')}</button>}
                       </div>
                     </div>
                   ))}
                 </div>
-                <button type="button" onClick={() => setPacientes([...pacientes, emptyPaciente()])} className="mt-2 text-sm font-medium text-brand">+ Agregar paciente</button>
+                <button type="button" onClick={() => setPacientes([...pacientes, emptyPaciente()])} className="mt-2 text-sm font-medium text-brand">{t('report_form.add_patient')}</button>
               </div>
-              {/* Listas de personas: fotos de pizarras/listas físicas o links */}
               <div>
-                <label className="mb-1 block text-sm font-semibold text-gray-700">Listas de personas</label>
-                <p className="mb-2 text-xs text-gray-500">Sube fotos de listas físicas o agrega links (Google Docs, Drive, etc.).</p>
+                <label className="mb-1 block text-sm font-semibold text-gray-700">{t('report_form.field_lists')}</label>
+                <p className="mb-2 text-xs text-gray-500">{t('report_form.field_lists_note')}</p>
                 <div className="space-y-2">
                   {listas.map((l, i) => (
                     <div key={i} className="rounded-xl border border-gray-200 p-3 space-y-2">
                       {l.tipo === 'foto' ? (
-                        <>
-                          <img src={l.preview} alt="Lista" className="h-32 w-full rounded-lg object-cover" />
-                        </>
+                        <img src={l.preview} alt="Lista" className="h-32 w-full rounded-lg object-cover" />
                       ) : (
                         <input
                           value={l.url}
                           onChange={(e) => { const c = [...listas]; (c[i] as { tipo: 'link'; url: string; descripcion: string }).url = e.target.value; setListas(c) }}
                           className="w-full rounded-lg border px-3 py-2 text-sm"
-                          placeholder="https://docs.google.com/..."
+                          placeholder={t('report_form.link_placeholder')}
                         />
                       )}
                       <div className="flex items-center gap-2">
@@ -349,16 +348,16 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
                           value={l.descripcion}
                           onChange={(e) => { const c = [...listas]; c[i] = { ...c[i], descripcion: e.target.value }; setListas(c) }}
                           className="flex-1 rounded-lg border px-3 py-2 text-sm"
-                          placeholder="Descripción opcional (ej: Lista UCI piso 3)"
+                          placeholder={t('report_form.list_desc_placeholder')}
                         />
-                        <button type="button" onClick={() => setListas(listas.filter((_, j) => j !== i))} className="text-sm text-red-500">Quitar</button>
+                        <button type="button" onClick={() => setListas(listas.filter((_, j) => j !== i))} className="text-sm text-red-500">{t('common.remove')}</button>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="mt-2 flex gap-3">
                   <label className="cursor-pointer text-sm font-medium text-brand">
-                    + Foto de lista
+                    {t('report_form.add_photo_list')}
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                       const f = e.target.files?.[0]
                       if (!f) return
@@ -367,7 +366,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
                     }} />
                   </label>
                   <button type="button" className="text-sm font-medium text-brand" onClick={() => setListas([...listas, { tipo: 'link', url: '', descripcion: '' }])}>
-                    + Link a lista
+                    {t('report_form.add_link_list')}
                   </button>
                 </div>
               </div>
@@ -376,43 +375,53 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
 
           {tipo === 'refugio' && (
             <>
-              <EstadoGrid label="Estado del refugio" estados={REFUGIO_ESTADOS} value={refugioEstado} onChange={setRefugioEstado} />
-              <Text label="Capacidad" value={capacidad} onChange={setCapacidad} placeholder="Ej: 50 personas" />
-              <Text label="Zona / Dirección referencial" value={zona} onChange={setZona} placeholder="Ej: El Valle, frente al mercado" />
-              <Text label="Horario de atención" value={horario} onChange={setHorario} placeholder="Ej: 24 horas · Solo nocturno" />
-              <Text label="Contacto" value={contacto} onChange={setContacto} placeholder="Ej: 0212-555-1234 · @usuario" />
+              <EstadoGrid
+                label={t('report_form.shelter_status_label')}
+                estados={REFUGIO_ESTADOS.map(e => ({ ...e, label: t(`estado.refugio.${e.value}`) }))}
+                value={refugioEstado}
+                onChange={setRefugioEstado}
+              />
+              <Text label={t('report_form.field_capacity_simple')} value={capacidad} onChange={setCapacidad} placeholder={t('report_form.ph_capacity')} />
+              <Text label={t('report_form.field_zone')} value={zona} onChange={setZona} placeholder={t('report_form.ph_zone_shelter')} />
+              <Text label={t('report_form.field_schedule')} value={horario} onChange={setHorario} placeholder={t('report_form.ph_schedule_shelter')} />
+              <Text label={t('report_form.field_contact')} value={contacto} onChange={setContacto} placeholder={t('report_form.ph_contact_shelter')} />
             </>
           )}
 
           {tipo === 'emergencia' && (
             <>
-              <Text label="Zona afectada" value={zona} onChange={setZona} placeholder="Ej: Petare, calle 4 con avenida principal" />
-              <Text label="Duración / desde cuándo" value={duracion} onChange={setDuracion} placeholder="Ej: Desde las 3am · Más de 6 horas" />
-              <Text label="Contacto o referencia" value={contacto} onChange={setContacto} placeholder="Ej: Bomberos ya fueron avisados" />
+              <Text label={t('report_form.field_affected_zone')} value={zona} onChange={setZona} placeholder={t('report_form.ph_zone_emergency')} />
+              <Text label={t('report_form.field_duration')} value={duracion} onChange={setDuracion} placeholder={t('report_form.ph_duration')} />
+              <Text label={t('report_form.field_contact_ref')} value={contacto} onChange={setContacto} placeholder={t('report_form.ph_contact_emergency')} />
             </>
           )}
 
           {tipo === 'personas' && (
             <>
-              <EstadoGrid label="Estado" estados={PERSONA_ESTADOS} value={personaEstado} onChange={setPersonaEstado} />
-              <Text label="Última vez vista" value={ultimaVez} onChange={setUltimaVez} placeholder="Lugar y hora aproximada" />
+              <EstadoGrid
+                label={t('report_form.field_status')}
+                estados={PERSONA_ESTADOS.map(e => ({ ...e, label: t(`estado.personas.${e.value}`) }))}
+                value={personaEstado}
+                onChange={setPersonaEstado}
+              />
+              <Text label={t('report_form.field_last_seen')} value={ultimaVez} onChange={setUltimaVez} placeholder={t('report_form.ph_last_seen')} />
             </>
           )}
 
           {tipo === 'necesidades' && (
-            <Text label="Zona" value={zona} onChange={setZona} placeholder="Ej: Catia" />
+            <Text label={t('report_form.field_zone_simple')} value={zona} onChange={setZona} placeholder={t('report_form.ph_zone_needs')} />
           )}
 
           {showAcepta && (
-            <Text label="Donaciones que aceptan (separar por comas)" value={aceptaText} onChange={setAceptaText} placeholder="Agua, alimentos, medicinas" />
+            <Text label={t('report_form.field_accepts')} value={aceptaText} onChange={setAceptaText} placeholder={t('report_form.ph_accepts')} />
           )}
 
           {showNeeds && (
             <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700">Necesidades</label>
+              <label className="mb-1 block text-sm font-semibold text-gray-700">{t('report_form.field_needs')}</label>
               {tipo === 'hospital' && (
                 <div className="mb-3">
-                  <p className="mb-2 text-xs text-gray-500">Selecciona las más comunes o agrega otras abajo.</p>
+                  <p className="mb-2 text-xs text-gray-500">{t('report_form.need_presets_label')}</p>
                   <div className="flex flex-wrap gap-2">
                     {HOSPITAL_NECESIDADES_PRESET.map((preset) => {
                       const active = necesidades.some((n) => n.nombre === preset)
@@ -433,7 +442,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
                             : { borderColor: '#e5e7eb', color: '#6b7280' }
                           }
                         >
-                          {preset}
+                          {t(`hospital_necesidades.${preset}`, { defaultValue: preset })}
                         </button>
                       )
                     })}
@@ -443,28 +452,41 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
               <div className="space-y-2">
                 {necesidades.map((n, i) => (
                   <div key={i} className="flex gap-2">
-                    <input value={n.nombre} onChange={(e) => { const c = [...necesidades]; c[i] = { ...c[i], nombre: e.target.value }; setNecesidades(c) }} className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm" placeholder={tipo === 'hospital' ? 'Ej: Desfibrilador' : 'Ej: Agua potable'} />
-                    <select value={n.nivel} onChange={(e) => { const c = [...necesidades]; c[i] = { ...c[i], nivel: e.target.value as Nivel }; setNecesidades(c) }} className="rounded-xl border border-gray-200 px-2 py-2 text-sm">
-                      {NIVELES.map((v) => <option key={v} value={v}>{v}</option>)}
+                    <input
+                      value={n.nombre}
+                      onChange={(e) => { const c = [...necesidades]; c[i] = { ...c[i], nombre: e.target.value }; setNecesidades(c) }}
+                      className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm"
+                      placeholder={tipo === 'hospital' ? t('report_form.ph_need_hospital') : t('report_form.ph_need_other')}
+                    />
+                    <select
+                      value={n.nivel}
+                      onChange={(e) => { const c = [...necesidades]; c[i] = { ...c[i], nivel: e.target.value as Nivel }; setNecesidades(c) }}
+                      className="rounded-xl border border-gray-200 px-2 py-2 text-sm"
+                    >
+                      {NIVELES.map((v) => <option key={v} value={v}>{t(`nivel.${v}`)}</option>)}
                     </select>
-                    {necesidades.length > 1 && <button type="button" onClick={() => setNecesidades(necesidades.filter((_, j) => j !== i))} className="text-sm text-red-500">✕</button>}
+                    {necesidades.length > 1 && (
+                      <button type="button" onClick={() => setNecesidades(necesidades.filter((_, j) => j !== i))} className="text-sm text-red-500">✕</button>
+                    )}
                   </div>
                 ))}
               </div>
-              <button type="button" onClick={() => setNecesidades([...necesidades, emptyNeed()])} className="mt-2 text-sm font-medium text-brand">+ Agregar necesidad</button>
+              <button type="button" onClick={() => setNecesidades([...necesidades, emptyNeed()])} className="mt-2 text-sm font-medium text-brand">
+                {t('report_form.add_need')}
+              </button>
             </div>
           )}
 
-          {/* ── Foto ── */}
+          {/* Foto */}
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">Foto (opcional)</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">{t('report_form.field_photo')}</label>
             <input type="file" accept="image/*" onChange={onFile} className="text-sm" />
             {fotoPreview && <img src={fotoPreview} alt="Vista previa" className="mt-2 h-40 w-full rounded-xl object-cover" />}
           </div>
 
-          {/* ── Ubicación ── */}
+          {/* Ubicación */}
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">Ubicación</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">{t('report_form.field_location')}</label>
             <LocationPicker lat={lat} lng={lng} onChange={(la, ln) => { setLat(la); setLng(ln) }} />
           </div>
 
@@ -477,7 +499,9 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
             disabled={submitting}
             className="w-full rounded-xl bg-brand py-3.5 font-bold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:opacity-60"
           >
-            {submitting ? (editing ? 'Guardando…' : 'Publicando…') : editing ? '✓ Guardar cambios' : '＋ Crear'}
+            {submitting
+              ? (editing ? t('report_form.submitting_edit') : t('report_form.submitting_create'))
+              : (editing ? t('report_form.submit_edit') : t('report_form.submit_create'))}
           </button>
         </footer>
       </div>

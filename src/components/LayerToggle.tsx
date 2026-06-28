@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { LAYERS } from '../layers'
 import type { Tipo } from '../types'
 
@@ -39,6 +40,7 @@ export default function LayerToggle({
   serviciosActive = false,
   onServicios,
 }: Props) {
+  const { t } = useTranslation()
   const reportLayers = LAYERS.filter((l) => l.id !== 'servicio')
   const allActive = active.size === LAYERS.length && !serviciosActive
 
@@ -58,7 +60,7 @@ export default function LayerToggle({
             >
               <IconGrid />
             </span>
-            <span className="flex-1 leading-tight">Todos</span>
+            <span className="flex-1 leading-tight">{t('layers.all')}</span>
           </button>
         )}
         {reportLayers.map((l) => {
@@ -77,7 +79,7 @@ export default function LayerToggle({
               >
                 {l.glyph}
               </span>
-              <span className="flex-1 leading-tight">{l.label}</span>
+              <span className="flex-1 leading-tight">{t(`layers.${l.id}.label`)}</span>
               <span
                 className="rounded-full px-1.5 py-0.5 text-xs font-semibold"
                 style={{
@@ -106,7 +108,7 @@ export default function LayerToggle({
               >
                 <IconWrench />
               </span>
-              <span className="flex-1 leading-tight">Servicios</span>
+              <span className="flex-1 leading-tight">{t('nav.services')}</span>
             </button>
           </>
         )}
@@ -114,7 +116,7 @@ export default function LayerToggle({
     )
   }
 
-  /* ── GRID (mobile — same card style as the create form) ──── */
+  /* ── GRID (mobile) ──── */
   const totalCount = Object.values(counts).reduce((a, b) => a + b, 0)
   return (
     <div className="grid grid-cols-4 gap-2 px-3 py-2">
@@ -130,7 +132,7 @@ export default function LayerToggle({
           }
         >
           <span className="text-base flex items-center justify-center" aria-hidden><IconGrid /></span>
-          <span className="leading-tight">Todos</span>
+          <span className="leading-tight">{t('layers.all')}</span>
           <span
             className="rounded-full px-1 text-[9px] font-semibold"
             style={allActive ? { backgroundColor: '#11182720', color: '#111827' } : { backgroundColor: '#f3f4f6', color: '#9ca3af' }}
@@ -155,7 +157,7 @@ export default function LayerToggle({
             }
           >
             <span className="text-base" aria-hidden>{l.glyph}</span>
-            <span className="leading-tight">{l.short}</span>
+            <span className="leading-tight">{t(`layers.${l.id}.short`)}</span>
             <span
               className="rounded-full px-1 text-[9px] font-semibold"
               style={on ? { backgroundColor: l.color + '20', color: l.color } : { backgroundColor: '#f3f4f6', color: '#9ca3af' }}
@@ -178,7 +180,7 @@ export default function LayerToggle({
           }
         >
           <span className="text-base flex items-center justify-center" aria-hidden><IconWrench /></span>
-          <span className="leading-tight">Servicios</span>
+          <span className="leading-tight">{t('nav.services')}</span>
           <span
             className="rounded-full px-1 text-[9px] font-semibold"
             style={serviciosActive ? { backgroundColor: '#00389320', color: '#003893' } : { backgroundColor: '#f3f4f6', color: '#9ca3af' }}

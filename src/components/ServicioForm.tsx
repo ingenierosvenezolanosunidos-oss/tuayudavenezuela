@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Report } from '../types'
 import { submitReport } from '../lib/submit'
 import LocationPicker from './LocationPicker'
@@ -22,11 +23,11 @@ export const SERVICIO_CATS = [
   { value: 'otro', label: 'Otro', emoji: '🔩' },
 ] as const
 
-// Center of Venezuela — used as default location when user skips the map.
 const VE_LAT = 8.0
 const VE_LNG = -66.0
 
 export default function ServicioForm({ onClose, onCreated }: Props) {
+  const { t } = useTranslation()
   const [nombre, setNombre] = useState('')
   const [categoria, setCategoria] = useState<string>(SERVICIO_CATS[0].value)
   const [descripcion, setDescripcion] = useState('')
@@ -41,8 +42,8 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    if (!nombre.trim()) return setError('Indica el nombre o título del servicio.')
-    if (!zona.trim()) return setError('Indica la zona o ciudad donde ofreces el servicio.')
+    if (!nombre.trim()) return setError(t('servicio_form.error_no_name'))
+    if (!zona.trim()) return setError(t('servicio_form.error_no_zone'))
 
     setSubmitting(true)
     try {
@@ -60,7 +61,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
       })
       onCreated(created)
     } catch (err) {
-      setError('No se pudo publicar el servicio. Intenta de nuevo.')
+      setError(t('common.error_generic'))
       console.error(err)
     } finally {
       setSubmitting(false)
@@ -73,22 +74,22 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
 
         <header className="flex shrink-0 items-center justify-between border-b px-4 py-3">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Ofrecer un servicio</h2>
-            <p className="text-xs text-gray-500">Comparte lo que puedes hacer por tu comunidad</p>
+            <h2 className="text-lg font-bold text-gray-900">{t('servicio_form.title')}</h2>
+            <p className="text-xs text-gray-500">{t('servicio_form.subtitle')}</p>
           </div>
-          <button onClick={onClose} aria-label="Cerrar" className="text-2xl leading-none text-gray-400 hover:text-gray-600">✕</button>
+          <button onClick={onClose} aria-label={t('common.close')} className="text-2xl leading-none text-gray-400 hover:text-gray-600">✕</button>
         </header>
 
         <form onSubmit={handleSubmit} className="flex-1 space-y-5 overflow-y-auto px-4 py-4">
 
           <p className="flex items-start gap-2 rounded-xl border border-cyan-100 bg-cyan-50 px-3 py-2.5 text-xs text-cyan-800">
             <span aria-hidden>🔒</span>
-            Publicación anónima. No pedimos nombre ni cuenta. El contacto es opcional.
+            {t('servicio_form.anonymous_notice')}
           </p>
 
           {/* Categoría */}
           <div>
-            <label className="mb-2 block text-sm font-semibold text-gray-700">Categoría</label>
+            <label className="mb-2 block text-sm font-semibold text-gray-700">{t('servicio_form.category_label')}</label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {SERVICIO_CATS.map((cat) => (
                 <button
@@ -103,7 +104,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
                   }
                 >
                   <span className="text-xl">{cat.emoji}</span>
-                  <span className="leading-tight">{cat.label}</span>
+                  <span className="leading-tight">{t(`servicio_cats.${cat.value}`)}</span>
                 </button>
               ))}
             </div>
@@ -112,24 +113,24 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
           {/* Nombre */}
           <div>
             <label className="mb-1 block text-sm font-semibold text-gray-700">
-              ¿Qué ofreces? <span className="text-red-500">*</span>
+              {t('servicio_form.what_label')} <span className="text-red-500">*</span>
             </label>
             <input
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              placeholder="Ej: Plomería, Ingeniero civil, Clases de inglés, Voluntario en salud"
+              placeholder={t('servicio_form.what_ph')}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
             />
           </div>
 
           {/* Descripción */}
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">Descripción (opcional)</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">{t('servicio_form.desc_label')}</label>
             <textarea
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
-              placeholder="Describe con más detalle lo que puedes hacer, tu experiencia, condiciones, etc."
+              placeholder={t('servicio_form.desc_ph')}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
             />
           </div>
@@ -137,41 +138,41 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
           {/* Zona */}
           <div>
             <label className="mb-1 block text-sm font-semibold text-gray-700">
-              Zona / Ciudad <span className="text-red-500">*</span>
+              {t('servicio_form.zone_label')} <span className="text-red-500">*</span>
             </label>
             <input
               value={zona}
               onChange={(e) => setZona(e.target.value)}
-              placeholder="Ej: Petare, Caracas · Maracaibo · Valencia"
+              placeholder={t('servicio_form.zone_ph')}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
             />
           </div>
 
           {/* Ubicación en el mapa */}
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">Ubicación en el mapa (opcional)</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">{t('servicio_form.location_label')}</label>
             <LocationPicker lat={lat} lng={lng} onChange={(la, ln) => { setLat(la); setLng(ln) }} />
           </div>
 
           {/* Contacto */}
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">Contacto (opcional)</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">{t('servicio_form.contact_label')}</label>
             <input
               value={contacto}
               onChange={(e) => setContacto(e.target.value)}
-              placeholder="Ej: WhatsApp 0414-555-1234 · @usuario_twitter"
+              placeholder={t('servicio_form.contact_ph')}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
             />
-            <p className="mt-1 text-xs text-gray-400">No pongas datos que no quieras hacer públicos.</p>
+            <p className="mt-1 text-xs text-gray-400">{t('servicio_form.contact_note')}</p>
           </div>
 
           {/* Disponibilidad */}
           <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700">Disponibilidad (opcional)</label>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">{t('servicio_form.schedule_label')}</label>
             <input
               value={horario}
               onChange={(e) => setHorario(e.target.value)}
-              placeholder="Ej: Fines de semana · Tardes · Inmediata"
+              placeholder={t('servicio_form.schedule_ph')}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
             />
           </div>
@@ -188,7 +189,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
             className="w-full rounded-xl py-3 font-semibold text-white shadow-sm transition-colors disabled:opacity-60"
             style={{ backgroundColor: '#0891B2' }}
           >
-            {submitting ? 'Publicando…' : '🛠️ Publicar servicio'}
+            {submitting ? t('servicio_form.submitting') : t('servicio_form.submit')}
           </button>
         </footer>
       </div>

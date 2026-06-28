@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { reportarContenido } from '../lib/submit'
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function SolicitarEliminacionModal({ reportId, nombreRegistro, onClose }: Props) {
+  const { t } = useTranslation()
   const [nombre, setNombre] = useState('')
   const [motivo, setMotivo] = useState('')
   const [sending, setSending] = useState(false)
@@ -15,8 +17,8 @@ export default function SolicitarEliminacionModal({ reportId, nombreRegistro, on
   const [error, setError] = useState('')
 
   async function enviar() {
-    if (!nombre.trim()) { setError('Por favor ingresa tu nombre.'); return }
-    if (!motivo.trim()) { setError('Por favor explica el motivo de la solicitud.'); return }
+    if (!nombre.trim()) { setError(t('eliminar_modal.error_no_name')); return }
+    if (!motivo.trim()) { setError(t('eliminar_modal.error_no_reason')); return }
     setError('')
     setSending(true)
     try {
@@ -36,74 +38,69 @@ export default function SolicitarEliminacionModal({ reportId, nombreRegistro, on
         {done ? (
           <div className="py-6 text-center">
             <div className="mb-2 text-4xl">📩</div>
-            <h2 className="text-lg font-bold text-gray-900">Solicitud enviada</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Revisaremos tu solicitud y eliminaremos el registro si corresponde.
-            </p>
+            <h2 className="text-lg font-bold text-gray-900">{t('eliminar_modal.done_title')}</h2>
+            <p className="mt-1 text-sm text-gray-600">{t('eliminar_modal.done_message')}</p>
             <button
               onClick={onClose}
               className="mt-4 w-full rounded-xl bg-brand py-2.5 font-semibold text-white"
             >
-              Cerrar
+              {t('common.close')}
             </button>
           </div>
         ) : (
           <>
             <div className="mb-1 flex items-start justify-between">
-              <h2 className="text-lg font-bold text-gray-900">Solicitar eliminación</h2>
-              <button onClick={onClose} aria-label="Cerrar" className="text-2xl leading-none text-gray-400">
+              <h2 className="text-lg font-bold text-gray-900">{t('eliminar_modal.title')}</h2>
+              <button onClick={onClose} aria-label={t('common.close')} className="text-2xl leading-none text-gray-400">
                 ✕
               </button>
             </div>
             <p className="mb-4 text-sm text-gray-600">
-              Registro: <span className="font-medium text-gray-800">{nombreRegistro}</span>
+              {t('eliminar_modal.record_label', { nombre: nombreRegistro })}
             </p>
 
             <div className="space-y-3">
               <div>
                 <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  Tu nombre <span className="text-red-500">*</span>
+                  {t('eliminar_modal.field_name')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  placeholder="Nombre completo"
+                  placeholder={t('eliminar_modal.ph_name')}
                   className="w-full rounded-lg border px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="mb-1 block text-sm font-semibold text-gray-700">
-                  ¿Por qué quieres eliminar este registro? <span className="text-red-500">*</span>
+                  {t('eliminar_modal.field_reason')} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={motivo}
                   onChange={(e) => setMotivo(e.target.value)}
                   rows={3}
-                  placeholder="Explica el motivo de la solicitud de eliminación."
+                  placeholder={t('eliminar_modal.ph_reason')}
                   className="w-full rounded-lg border px-3 py-2 text-sm"
                 />
               </div>
             </div>
 
-            {error && (
-              <p className="mt-2 text-xs text-red-500">{error}</p>
-            )}
+            {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
 
             <div className="mt-4 flex gap-2">
               <button
                 onClick={onClose}
                 className="flex-1 rounded-xl border border-gray-300 py-2.5 font-semibold text-gray-700"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 onClick={enviar}
                 disabled={sending}
                 className="flex-1 rounded-xl bg-red-500 py-2.5 font-semibold text-white disabled:opacity-60"
               >
-                {sending ? 'Enviando…' : 'Enviar solicitud'}
+                {sending ? t('common.sending') : t('eliminar_modal.submit')}
               </button>
             </div>
           </>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
+import { useTranslation } from 'react-i18next'
 import L from 'leaflet'
 import { CARACAS_CENTER } from '../data/dummy'
 
@@ -38,6 +39,7 @@ function FlyTo({ target }: { target: [number, number] | null }) {
 }
 
 export default function LocationPicker({ lat, lng, onChange }: Props) {
+  const { t } = useTranslation()
   const [locating, setLocating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null)
@@ -46,7 +48,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
 
   function useGps() {
     if (!navigator.geolocation) {
-      setError('Tu dispositivo no permite ubicación.')
+      setError(t('location_picker.error_no_geo'))
       return
     }
     setLocating(true)
@@ -59,7 +61,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
         setLocating(false)
       },
       () => {
-        setError('No se pudo obtener tu ubicación. Toca el mapa para marcarla.')
+        setError(t('location_picker.error_geo_fail'))
         setLocating(false)
       },
       { enableHighAccuracy: true, timeout: 10000 },
@@ -76,7 +78,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
       const res = await fetch(url, { headers: { 'Accept-Language': 'es' } })
       const data = await res.json()
       if (!data.length) {
-        setError('No se encontró esa dirección. Intenta con más detalle o toca el mapa.')
+        setError(t('location_picker.error_not_found'))
         setSearching(false)
         return
       }
@@ -85,7 +87,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
       onChange(coords[0], coords[1])
       setFlyTarget(coords)
     } catch {
-      setError('Error al buscar la dirección. Toca el mapa para marcar.')
+      setError(t('location_picker.error_search_fail'))
     } finally {
       setSearching(false)
     }
@@ -102,7 +104,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), searchAddress())}
-          placeholder="Buscar dirección (ej: Av. Francisco de Miranda, Caracas)"
+          placeholder={t('location_picker.search_ph')}
           className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-brand focus:outline-none"
         />
         <button
@@ -118,7 +120,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
       {/* GPS + map — same action: place the pin */}
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          Coloca el punto en el mapa
+          {t('location_picker.place_pin_label')}
         </p>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <button
@@ -127,9 +129,9 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
             className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
             disabled={locating}
           >
-            {locating ? 'Ubicando…' : '📍 Usar mi ubicación'}
+            {locating ? t('location_picker.locating') : t('location_picker.use_location')}
           </button>
-          <span className="text-xs text-gray-500">o toca directamente el mapa</span>
+          <span className="text-xs text-gray-500">{t('location_picker.or_tap_map')}</span>
         </div>
 
         <div className="h-64 overflow-hidden rounded-lg border">
@@ -143,7 +145,7 @@ export default function LocationPicker({ lat, lng, onChange }: Props) {
 
         {lat != null && lng != null && (
           <div className="mt-1 text-xs text-gray-500">
-            Ubicación: {lat.toFixed(5)}, {lng.toFixed(5)}
+            {t('location_picker.coords', { lat: lat.toFixed(5), lng: lng.toFixed(5) })}
           </div>
         )}
         {error && <div className="mt-1 text-xs text-hospital">{error}</div>}
