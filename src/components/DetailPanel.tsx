@@ -265,14 +265,6 @@ function CategoryBody({
     case 'emergencia':
       return (
         <>
-          {report.foto_url && (
-            <img
-              src={report.foto_url}
-              alt={report.nombre}
-              className="mb-3 h-48 w-full rounded-lg object-cover"
-              loading="lazy"
-            />
-          )}
           <Field label="Descripción" value={report.descripcion} />
           <Field label="Zona afectada" value={report.zona} />
           <Field label="Duración / desde cuándo" value={report.duracion} />
@@ -329,11 +321,10 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
           </div>
           <button
             onClick={() => onEdit(report)}
-            aria-label="Editar"
-            className="rounded-full bg-white/20 px-2 py-1 text-sm leading-none text-white"
-            title="Editar publicación"
+            aria-label="Editar publicación"
+            className="flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-sm font-semibold leading-none text-white"
           >
-            ✏️
+            ✏️ <span>Editar</span>
           </button>
           <button
             onClick={onClose}
@@ -345,6 +336,16 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
         </div>
 
         <div className="overflow-y-auto px-4 py-3">
+          {/* Foto del reporte */}
+          {report.foto_url && report.tipo !== 'personas' && (
+            <img
+              src={report.foto_url}
+              alt={report.nombre}
+              className="mb-3 h-48 w-full rounded-xl object-cover"
+              loading="lazy"
+            />
+          )}
+
           {report.descripcion && report.tipo !== 'infra' && report.tipo !== 'emergencia' && report.tipo !== 'personas' && (
             <p className="mb-3 text-sm text-gray-700">{report.descripcion}</p>
           )}
@@ -354,19 +355,26 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
             onRequestLocalizar={() => setLocalizarOpen(true)}
           />
 
-          <ShareBar report={report} onReportar={() => setReportarOpen(true)} />
+          <ShareBar report={report} />
 
-          <div className="mt-3 border-t pt-2 text-xs text-gray-400">
-            Reportado: {new Date(report.created_at).toLocaleString('es-VE')}
-          </div>
-
-          <div className="mt-2 text-center">
-            <button
-              onClick={() => setEliminarOpen(true)}
-              className="text-xs text-gray-400 underline hover:text-red-500"
-            >
-              Solicitar eliminación de este registro
-            </button>
+          <div className="mt-4 border-t pt-3">
+            <p className="mb-1 text-xs text-gray-400">
+              Publicado el {new Date(report.created_at).toLocaleDateString('es-VE', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+            <div className="flex flex-col gap-1.5">
+              <button
+                onClick={() => setReportarOpen(true)}
+                className="text-left text-xs text-gray-400 underline decoration-dotted underline-offset-2 hover:text-red-500"
+              >
+                🚩 Reportar contenido obsceno o falso
+              </button>
+              <button
+                onClick={() => setEliminarOpen(true)}
+                className="text-left text-xs text-gray-400 underline decoration-dotted underline-offset-2 hover:text-red-500"
+              >
+                🗑️ Solicitar eliminación de este registro
+              </button>
+            </div>
           </div>
         </div>
       </aside>

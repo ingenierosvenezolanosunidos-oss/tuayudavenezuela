@@ -3,7 +3,6 @@ import { LAYER_BY_ID } from '../layers'
 
 interface Props {
   report: Report
-  onReportar: () => void
 }
 
 // Build a shareable text, a deep link to the report, and a maps location URL.
@@ -16,7 +15,7 @@ function buildShare(report: Report) {
   return { maps, link, text }
 }
 
-export default function ShareBar({ report, onReportar }: Props) {
+export default function ShareBar({ report }: Props) {
   const { maps, link, text } = buildShare(report)
   const wa = `https://wa.me/?text=${encodeURIComponent(`${text} ${link}`)}`
   const x = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`
@@ -72,21 +71,15 @@ export default function ShareBar({ report, onReportar }: Props) {
         </button>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-2">
+      <div className="mt-3">
         <a
           href={maps}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700"
+          className="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700"
         >
           🧭 Cómo llegar
         </a>
-        <button
-          onClick={onReportar}
-          className="text-xs font-medium text-gray-400 underline decoration-dotted underline-offset-2"
-        >
-          🚩 Reportar contenido obsceno o falso
-        </button>
       </div>
     </div>
   )
