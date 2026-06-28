@@ -25,7 +25,12 @@ Deno.serve(async (req) => {
       })
       const data = await res.json()
       const score: number = data.score ?? 1
-      if (!data.success || score < 0.5) {
+      const codes: string[] = data['error-codes'] ?? []
+      // 'browser-error' means reCAPTCHA could not run in the client environment
+      // (extensions, privacy settings, network) — not a bot signal. Don't block
+      // writes on it; still reject low scores and invalid/duplicate tokens.
+      const couldNotVerify = codes.includes('browser-error')
+      if (!couldNotVerify && (!data.success || score < 0.5)) {
         return new Response(JSON.stringify({ error: 'reCAPTCHA inválido' }), {
           status: 403,
           headers: { ...CORS, 'Content-Type': 'application/json' },

@@ -38,7 +38,13 @@ Deno.serve(async (req) => {
       })
       const data = await res.json()
       const score: number = data.score ?? 1
-      if (!data.success || score < 0.5) {
+      const codes: string[] = data['error-codes'] ?? []
+      // 'browser-error' means reCAPTCHA could not run in the client environment
+      // (extensions, privacy settings, network) — it is NOT a bot signal. We must
+      // not block writes on it, or legitimate users in such browsers can never
+      // save. We still reject low scores and genuinely invalid/duplicate tokens.
+      const couldNotVerify = codes.includes('browser-error')
+      if (!couldNotVerify && (!data.success || score < 0.5)) {
         const detail = {
           error: 'reCAPTCHA inválido',
           success: data.success,
