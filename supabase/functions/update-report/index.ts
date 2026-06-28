@@ -39,7 +39,14 @@ Deno.serve(async (req) => {
       const data = await res.json()
       const score: number = data.score ?? 1
       if (!data.success || score < 0.5) {
-        return new Response(JSON.stringify({ error: 'reCAPTCHA inválido' }), {
+        const detail = {
+          error: 'reCAPTCHA inválido',
+          success: data.success,
+          score: data.score,
+          action: data.action,
+          'error-codes': data['error-codes'] ?? null,
+        }
+        return new Response(JSON.stringify(detail), {
           status: 403,
           headers: { ...CORS, 'Content-Type': 'application/json' },
         })
