@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { LAYERS } from '../layers'
+import { LayerIcon } from './layerIcons'
 import type { Tipo } from '../types'
 
 interface Props {
@@ -11,6 +12,13 @@ interface Props {
   serviciosActive?: boolean
   onServicios?: () => void
 }
+
+// Unified green palette for every filter — light green by default, dark green
+// when selected, white icon/text when selected.
+const GREEN = '#059669'
+const GREEN_DARK = '#047857'
+const GREEN_TINT = '#ECFDF5'
+const GREEN_BORDER = '#A7F3D0'
 
 function IconGrid() {
   return (
@@ -45,19 +53,23 @@ export default function LayerToggle({
   const allActive = active.size === LAYERS.length && !serviciosActive
 
   if (vertical) {
+    const rowStyle = (on: boolean) =>
+      on ? { backgroundColor: GREEN_DARK, color: '#fff' } : { color: '#374151' }
+    const iconBox = (on: boolean) =>
+      ({ backgroundColor: on ? 'rgba(255,255,255,.22)' : GREEN_TINT, color: on ? '#fff' : GREEN })
+    const badge = (on: boolean) =>
+      ({ backgroundColor: on ? 'rgba(255,255,255,.22)' : GREEN_TINT, color: on ? '#fff' : GREEN })
+
     return (
       <div className="flex flex-col gap-0.5">
         {onAll && (
           <button
             onClick={onAll}
             aria-pressed={allActive}
-            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left hover:bg-gray-50"
-            style={allActive ? { color: '#111827' } : { color: '#6b7280' }}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left"
+            style={rowStyle(allActive)}
           >
-            <span
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-              style={{ backgroundColor: allActive ? '#11182720' : '#f3f4f6' }}
-            >
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={iconBox(allActive)}>
               <IconGrid />
             </span>
             <span className="flex-1 leading-tight">{t('layers.all')}</span>
@@ -70,23 +82,14 @@ export default function LayerToggle({
               key={l.id}
               onClick={() => onSelect(l.id)}
               aria-pressed={on}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left hover:bg-gray-50"
-              style={on ? { color: l.color } : { color: '#6b7280' }}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left"
+              style={rowStyle(on)}
             >
-              <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-base"
-                style={{ backgroundColor: on ? l.color + '20' : '#f3f4f6' }}
-              >
-                {l.glyph}
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={iconBox(on)}>
+                <LayerIcon tipo={l.id} size={17} />
               </span>
               <span className="flex-1 leading-tight">{t(`layers.${l.id}.label`)}</span>
-              <span
-                className="rounded-full px-1.5 py-0.5 text-xs font-semibold"
-                style={{
-                  backgroundColor: on ? l.color + '20' : '#f3f4f6',
-                  color: on ? l.color : '#9ca3af',
-                }}
-              >
+              <span className="rounded-full px-1.5 py-0.5 text-xs font-semibold" style={badge(on)}>
                 {counts[l.id] ?? 0}
               </span>
             </button>
@@ -99,13 +102,10 @@ export default function LayerToggle({
             <button
               onClick={onServicios}
               aria-pressed={serviciosActive}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left hover:bg-gray-50"
-              style={serviciosActive ? { color: '#003893' } : { color: '#6b7280' }}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all text-left"
+              style={rowStyle(serviciosActive)}
             >
-              <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-                style={{ backgroundColor: serviciosActive ? '#00389320' : '#f3f4f6' }}
-              >
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={iconBox(serviciosActive)}>
                 <IconWrench />
               </span>
               <span className="flex-1 leading-tight">{t('nav.services')}</span>
@@ -116,7 +116,14 @@ export default function LayerToggle({
     )
   }
 
-  /* ── GRID (mobile) ──── */
+  /* ── GRID (mobile chips) ──── */
+  const chipStyle = (on: boolean) =>
+    on
+      ? { borderColor: GREEN_DARK, backgroundColor: GREEN_DARK, color: '#fff' }
+      : { borderColor: GREEN_BORDER, backgroundColor: GREEN_TINT, color: GREEN }
+  const badgeStyle = (on: boolean) =>
+    on ? { backgroundColor: 'rgba(255,255,255,.25)', color: '#fff' } : { backgroundColor: '#D1FAE5', color: GREEN }
+
   const totalCount = Object.values(counts).reduce((a, b) => a + b, 0)
   return (
     <div className="grid grid-cols-4 gap-2 px-3 py-2">
@@ -125,18 +132,11 @@ export default function LayerToggle({
           onClick={onAll}
           aria-pressed={allActive}
           className="flex flex-col items-center gap-0.5 rounded-xl border px-1 py-1.5 text-center text-[10px] font-semibold transition-all"
-          style={
-            allActive
-              ? { borderColor: '#111827', backgroundColor: '#11182714', color: '#111827' }
-              : { borderColor: '#e5e7eb', color: '#6b7280' }
-          }
+          style={chipStyle(allActive)}
         >
-          <span className="text-base flex items-center justify-center" aria-hidden><IconGrid /></span>
+          <span className="flex items-center justify-center" aria-hidden><IconGrid /></span>
           <span className="leading-tight">{t('layers.all')}</span>
-          <span
-            className="rounded-full px-1 text-[9px] font-semibold"
-            style={allActive ? { backgroundColor: '#11182720', color: '#111827' } : { backgroundColor: '#f3f4f6', color: '#9ca3af' }}
-          >
+          <span className="rounded-full px-1 text-[9px] font-semibold" style={badgeStyle(allActive)}>
             {totalCount}
           </span>
         </button>
@@ -150,18 +150,11 @@ export default function LayerToggle({
             onClick={() => onSelect(l.id)}
             aria-pressed={on}
             className="flex flex-col items-center gap-0.5 rounded-xl border px-1 py-1.5 text-center text-[10px] font-semibold transition-all"
-            style={
-              on
-                ? { borderColor: l.color, backgroundColor: l.color + '14', color: l.color }
-                : { borderColor: '#e5e7eb', color: '#6b7280' }
-            }
+            style={chipStyle(on)}
           >
-            <span className="text-base" aria-hidden>{l.glyph}</span>
+            <span className="flex items-center justify-center" aria-hidden><LayerIcon tipo={l.id} size={18} /></span>
             <span className="leading-tight">{t(`layers.${l.id}.short`)}</span>
-            <span
-              className="rounded-full px-1 text-[9px] font-semibold"
-              style={on ? { backgroundColor: l.color + '20', color: l.color } : { backgroundColor: '#f3f4f6', color: '#9ca3af' }}
-            >
+            <span className="rounded-full px-1 text-[9px] font-semibold" style={badgeStyle(on)}>
               {counts[l.id] ?? 0}
             </span>
           </button>
@@ -173,18 +166,11 @@ export default function LayerToggle({
           onClick={onServicios}
           aria-pressed={serviciosActive}
           className="flex flex-col items-center gap-0.5 rounded-xl border px-1 py-1.5 text-center text-[10px] font-semibold transition-all"
-          style={
-            serviciosActive
-              ? { borderColor: '#003893', backgroundColor: '#00389314', color: '#003893' }
-              : { borderColor: '#e5e7eb', color: '#6b7280' }
-          }
+          style={chipStyle(serviciosActive)}
         >
-          <span className="text-base flex items-center justify-center" aria-hidden><IconWrench /></span>
+          <span className="flex items-center justify-center" aria-hidden><IconWrench /></span>
           <span className="leading-tight">{t('nav.services')}</span>
-          <span
-            className="rounded-full px-1 text-[9px] font-semibold"
-            style={serviciosActive ? { backgroundColor: '#00389320', color: '#003893' } : { backgroundColor: '#f3f4f6', color: '#9ca3af' }}
-          >
+          <span className="rounded-full px-1 text-[9px] font-semibold" style={badgeStyle(serviciosActive)}>
             &nbsp;
           </span>
         </button>

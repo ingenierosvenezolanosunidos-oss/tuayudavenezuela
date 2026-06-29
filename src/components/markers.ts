@@ -1,9 +1,10 @@
 import L from 'leaflet'
 import { LAYER_BY_ID } from '../layers'
+import { layerIconSvg } from './layerIcons'
 import type { Tipo } from '../types'
 
-// Build a lightweight pin as an HTML divIcon — no image assets, fully colored
-// per category, with the layer glyph in the center.
+// Build a lightweight pin as an HTML divIcon — no image assets, colored per
+// category, with a white line icon in the center.
 const cache = new Map<Tipo, L.DivIcon>()
 
 export function pinIcon(tipo: Tipo): L.DivIcon {
@@ -13,7 +14,7 @@ export function pinIcon(tipo: Tipo): L.DivIcon {
   const layer = LAYER_BY_ID[tipo]
   const html = `
     <div class="pin" style="--pin:${layer.color}">
-      <span class="pin__glyph">${layer.glyph}</span>
+      <span class="pin__glyph">${layerIconSvg(tipo, '#fff', 18)}</span>
     </div>`
   const icon = L.divIcon({
     html,

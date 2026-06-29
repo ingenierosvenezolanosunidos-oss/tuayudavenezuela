@@ -4,6 +4,7 @@ import type { Nivel, Report, Tipo } from '../types'
 import { LAYERS, PERSONA_ESTADOS, HOSPITAL_ESTADOS, HOSPITAL_TIPOS, HOSPITAL_NECESIDADES_PRESET, REFUGIO_ESTADOS } from '../layers'
 import { submitReport, updateReport, type DraftReport } from '../lib/submit'
 import LocationPicker from './LocationPicker'
+import { LayerIcon } from './layerIcons'
 
 interface Props {
   onClose: () => void
@@ -179,8 +180,8 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
         <header className="flex shrink-0 items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             {activeLayer && (
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg text-lg" style={{ backgroundColor: activeLayer.color + '18' }}>
-                {activeLayer.glyph}
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: activeLayer.color + '18', color: activeLayer.color }}>
+                <LayerIcon tipo={activeLayer.id} size={18} />
               </span>
             )}
             <h2 className="text-lg font-bold text-gray-900">
@@ -212,7 +213,7 @@ export default function ReportForm({ onClose, onCreated, initialTipo = 'acopio',
                       : { borderColor: '#e5e7eb', color: '#6b7280' }
                   }
                 >
-                  <span className="text-xl" aria-hidden>{l.glyph}</span>
+                  <span className="flex items-center justify-center" aria-hidden><LayerIcon tipo={l.id} size={20} /></span>
                   <span className="leading-tight">{t(`layers.${l.id}.short`)}</span>
                 </button>
               ))}

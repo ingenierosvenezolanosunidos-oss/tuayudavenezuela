@@ -56,7 +56,7 @@ export const LAYERS: LayerDef[] = [
     id: 'servicio',
     label: 'Servicios ofrecidos',
     short: 'Servicios',
-    color: '#0891B2',
+    color: '#059669',
     glyph: '🛠️',
     descripcion: 'Personas y grupos ofreciendo sus servicios',
   },

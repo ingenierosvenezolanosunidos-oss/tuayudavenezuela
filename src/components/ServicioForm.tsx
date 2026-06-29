@@ -99,7 +99,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
                   className="flex flex-col items-center gap-1 rounded-xl border p-2.5 text-center text-xs font-medium transition-all"
                   style={
                     categoria === cat.value
-                      ? { borderColor: '#0891B2', backgroundColor: '#0891B215', color: '#0891B2' }
+                      ? { borderColor: '#059669', backgroundColor: '#05966915', color: '#059669' }
                       : { borderColor: '#e5e7eb', color: '#6b7280' }
                   }
                 >
@@ -119,7 +119,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               placeholder={t('servicio_form.what_ph')}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#059669] focus:outline-none"
             />
           </div>
 
@@ -131,7 +131,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
               placeholder={t('servicio_form.desc_ph')}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#059669] focus:outline-none"
             />
           </div>
 
@@ -144,7 +144,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
               value={zona}
               onChange={(e) => setZona(e.target.value)}
               placeholder={t('servicio_form.zone_ph')}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#059669] focus:outline-none"
             />
           </div>
 
@@ -161,7 +161,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
               value={contacto}
               onChange={(e) => setContacto(e.target.value)}
               placeholder={t('servicio_form.contact_ph')}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#059669] focus:outline-none"
             />
             <p className="mt-1 text-xs text-gray-400">{t('servicio_form.contact_note')}</p>
           </div>
@@ -173,7 +173,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
               value={horario}
               onChange={(e) => setHorario(e.target.value)}
               placeholder={t('servicio_form.schedule_ph')}
-              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#0891B2] focus:outline-none"
+              className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:border-[#059669] focus:outline-none"
             />
           </div>
 
@@ -187,7 +187,7 @@ export default function ServicioForm({ onClose, onCreated }: Props) {
             onClick={handleSubmit}
             disabled={submitting}
             className="w-full rounded-xl py-3 font-semibold text-white shadow-sm transition-colors disabled:opacity-60"
-            style={{ backgroundColor: '#0891B2' }}
+            style={{ backgroundColor: '#059669' }}
           >
             {submitting ? t('servicio_form.submitting') : t('servicio_form.submit')}
           </button>

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import type { Report } from '../types'
 import { LAYER_BY_ID, PERSONA_ESTADOS } from '../layers'
+import { LayerIcon } from './layerIcons'
 
 interface Props {
   reports: Report[]
@@ -19,7 +20,7 @@ export default function PersonasStats({ reports }: Props) {
   return (
     <div className="flex items-center gap-3 overflow-x-auto border-b border-gray-200 bg-white px-4 py-2 text-sm no-scrollbar">
       <span className="flex shrink-0 items-center gap-1 font-semibold" style={{ color: layer.color }}>
-        <span aria-hidden>{layer.glyph}</span>
+        <LayerIcon tipo="personas" size={16} strokeWidth={2} />
         {t('personas_stats.label')}
       </span>
       <Stat n={personas.length} label={t('personas_stats.reported')} color="#374151" />

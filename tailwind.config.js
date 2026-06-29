@@ -10,13 +10,13 @@ export default {
           blue: '#003893',
           red: '#CF142B',
         },
-        // Brand chrome — Venezuela blue as primary action color.
+        // Brand chrome — esmerald green as the unified primary action color.
         brand: {
-          DEFAULT: '#003893',
-          dark: '#002570',
-          darker: '#001A50',
-          light: '#0044B3',
-          tint: '#EEF3FF',
+          DEFAULT: '#059669',
+          dark: '#047857',
+          darker: '#065F46',
+          light: '#10B981',
+          tint: '#ECFDF5',
         },
         // Functional map-legend colors (one per layer) — kept distinct.
         acopio: '#1D9E75',

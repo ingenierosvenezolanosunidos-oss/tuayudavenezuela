@@ -7,6 +7,7 @@ import {
   PERSONA_ESTADO_BY_VALUE,
   HOSPITAL_ESTADO_BY_VALUE,
 } from '../layers'
+import { LayerIcon } from './layerIcons'
 
 function thumbUrl(r: Report): string | null {
   return r.foto_url ?? r.personas?.[0]?.foto_url ?? null
@@ -31,7 +32,9 @@ function CardImage({ report, layer }: { report: Report; layer: LayerDef }) {
       className="flex h-full w-full flex-col items-center justify-center gap-2"
       style={{ backgroundColor: layer.color + '12' }}
     >
-      <span className="text-5xl opacity-60" aria-hidden>{layer.glyph}</span>
+      <span className="opacity-50" style={{ color: layer.color }} aria-hidden>
+        <LayerIcon tipo={report.tipo} size={44} strokeWidth={1.5} />
+      </span>
     </div>
   )
 }
@@ -85,7 +88,7 @@ export default function ListView({ reports, active, onSelect }: Props) {
                     className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-white shadow"
                     style={{ backgroundColor: layer.color }}
                   >
-                    <span style={{ fontSize: '11px' }}>{layer.glyph}</span>
+                    <LayerIcon tipo={r.tipo} size={12} strokeWidth={2.25} />
                     <span>{t(`layers.${layer.id}.short`)}</span>
                   </span>
                 </div>
@@ -110,7 +113,7 @@ export default function ListView({ reports, active, onSelect }: Props) {
 
               {/* Info */}
               <div className="flex flex-1 flex-col gap-1 p-2.5 xl:gap-1.5 xl:p-3.5">
-                <h3 className="line-clamp-2 text-[12px] font-bold leading-snug text-gray-900 group-hover:text-[#003893] xl:text-[15px]">
+                <h3 className="line-clamp-2 text-[12px] font-bold leading-snug text-gray-900 group-hover:text-brand xl:text-[15px]">
                   {r.nombre}
                 </h3>
 

@@ -43,7 +43,7 @@ function catInfo(value: string): { value: string; label: string; emoji: string }
 }
 
 function estadoColor(estado: string) {
-  return estado === 'no_disponible' ? '#9ca3af' : '#0891B2'
+  return estado === 'no_disponible' ? '#9ca3af' : '#059669'
 }
 
 export default function ServiciosView({ services, onAdd, onSelect }: Props) {
@@ -70,7 +70,7 @@ export default function ServiciosView({ services, onAdd, onSelect }: Props) {
           <button
             onClick={onAdd}
             className="flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-90 active:scale-95"
-            style={{ backgroundColor: '#0891B2' }}
+            style={{ backgroundColor: '#059669' }}
           >
             <span>＋</span>
             <span>{t('servicios_view.offer_btn_short')}</span>
@@ -84,7 +84,7 @@ export default function ServiciosView({ services, onAdd, onSelect }: Props) {
               className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
                 filtro === null ? 'text-white shadow-sm' : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
               }`}
-              style={filtro === null ? { backgroundColor: '#0891B2', borderColor: '#0891B2' } : {}}
+              style={filtro === null ? { backgroundColor: '#059669', borderColor: '#059669' } : {}}
             >
               {t('servicios_view.filter_all')}
             </button>
@@ -95,7 +95,7 @@ export default function ServiciosView({ services, onAdd, onSelect }: Props) {
                 className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
                   filtro === cat.value ? 'text-white shadow-sm' : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
                 }`}
-                style={filtro === cat.value ? { backgroundColor: '#0891B2', borderColor: '#0891B2' } : {}}
+                style={filtro === cat.value ? { backgroundColor: '#059669', borderColor: '#059669' } : {}}
               >
                 <span>{cat.emoji}</span>
                 <span>{t(`servicio_cats.${cat.value}`)}</span>
@@ -121,7 +121,7 @@ export default function ServiciosView({ services, onAdd, onSelect }: Props) {
             <button
               onClick={onAdd}
               className="rounded-xl px-6 py-2.5 text-sm font-semibold text-white"
-              style={{ backgroundColor: '#0891B2' }}
+              style={{ backgroundColor: '#059669' }}
             >
               {t('servicios_view.offer_btn')}
             </button>
@@ -140,7 +140,7 @@ export default function ServiciosView({ services, onAdd, onSelect }: Props) {
                   <div className="flex items-start justify-between gap-2">
                     <span
                       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold text-white"
-                      style={{ backgroundColor: '#0891B2' }}
+                      style={{ backgroundColor: '#059669' }}
                     >
                       <span>{cat.emoji}</span>
                       <span>{t(`servicio_cats.${cat.value}`, { defaultValue: cat.label })}</span>
@@ -190,7 +190,7 @@ export default function ServiciosView({ services, onAdd, onSelect }: Props) {
                     </div>
                     <span
                       className="flex h-7 w-7 items-center justify-center rounded-full transition-transform group-hover:translate-x-0.5"
-                      style={{ backgroundColor: '#0891B218', color: '#0891B2' }}
+                      style={{ backgroundColor: '#05966918', color: '#059669' }}
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M9 18l6-6-6-6" />

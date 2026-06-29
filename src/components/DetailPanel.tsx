@@ -8,6 +8,7 @@ import {
   PERSONA_ESTADO_BY_VALUE,
   HOSPITAL_ESTADO_BY_VALUE,
 } from '../layers'
+import { LayerIcon } from './layerIcons'
 import LocalizarModal, { type LocalizacionData } from './LocalizarModal'
 import ShareBar from './ShareBar'
 import ReportarContenidoModal from './ReportarContenidoModal'
@@ -285,7 +286,7 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
           className="flex items-start gap-3 rounded-t-2xl px-4 py-3 md:rounded-none"
           style={{ backgroundColor: layer.color }}
         >
-          <span className="text-2xl" aria-hidden>{layer.glyph}</span>
+          <span className="text-white" aria-hidden><LayerIcon tipo={report.tipo} size={24} /></span>
           <div className="min-w-0 flex-1">
             <div className="text-xs font-medium uppercase tracking-wide text-white/80">
               {t(`layers.${layer.id}.label`)}

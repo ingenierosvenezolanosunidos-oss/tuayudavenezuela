@@ -14,6 +14,8 @@ import DetailPanel from './components/DetailPanel'
 import ReportForm from './components/ReportForm'
 import InfoModal from './components/InfoModal'
 import LanguageSwitcher from './components/LanguageSwitcher'
+import { LayerIcon } from './components/layerIcons'
+import logoUrl from './assets/logo.png'
 import { updatePersonaEstado, updatePersonaLocalizada } from './lib/submit'
 import type { LocalizacionData } from './components/LocalizarModal'
 
@@ -205,24 +207,16 @@ export default function App() {
       <aside className="hidden lg:flex lg:w-72 lg:shrink-0 lg:flex-col lg:border-r lg:border-gray-100 lg:bg-white">
 
         <button onClick={goHome} className="flex items-center gap-3 px-5 py-4 text-left hover:opacity-80 transition-opacity">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-xl border border-gray-100">
-            🇻🇪
-          </span>
+          <img src={logoUrl} alt="tuAyudaVenezuela" className="h-11 w-11 shrink-0 object-contain" />
           <div className="leading-tight">
             <h1 className="text-lg font-bold tracking-tight">
-              <span style={{ color: '#D4A017' }}>tu</span>
-              <span style={{ color: '#003893' }}>Ayuda</span>
-              <span style={{ color: '#CF142B' }}>Venezuela</span>
+              <span style={{ color: '#64748B' }}>tu</span>
+              <span style={{ color: '#059669' }}>Ayuda</span>
+              <span style={{ color: '#0F172A' }}>Venezuela</span>
             </h1>
             <p className="text-[11px] text-gray-400">{t('app.tagline')}</p>
           </div>
         </button>
-
-        <div className="flex h-1 w-full shrink-0">
-          <div className="flex-1" style={{ backgroundColor: '#FCD116' }} />
-          <div className="flex-1" style={{ backgroundColor: '#003893' }} />
-          <div className="flex-1" style={{ backgroundColor: '#CF142B' }} />
-        </div>
 
         {/* Nav: Mapa / Lista (desktop sidebar — Servicios is in the layer list) */}
         <nav className="flex flex-col gap-1 px-3 py-3">
@@ -235,7 +229,7 @@ export default function App() {
               }}
               className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors text-left ${
                 view === item.id && !isServicios
-                  ? 'bg-[#003893] text-white'
+                  ? 'bg-brand text-white'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -312,7 +306,7 @@ export default function App() {
             {t('app.contact_label')}{' '}
             <a
               href="mailto:ingenierosvenezolanosunidos@gmail.com"
-              className="text-[#003893] underline break-all hover:text-[#CF142B] transition-colors"
+              className="text-brand underline break-all hover:text-brand-dark transition-colors"
             >
               ingenierosvenezolanosunidos@gmail.com
             </a>
@@ -326,11 +320,11 @@ export default function App() {
         {/* Mobile header */}
         <header className="relative z-30 flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-3 shadow-sm lg:hidden">
           <button onClick={goHome} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <span className="text-xl">🇻🇪</span>
+            <img src={logoUrl} alt="tuAyudaVenezuela" className="h-9 w-9 shrink-0 object-contain" />
             <h1 className="text-[15px] font-bold tracking-tight">
-              <span style={{ color: '#D4A017' }}>tu</span>
-              <span style={{ color: '#003893' }}>Ayuda</span>
-              <span style={{ color: '#CF142B' }}>Venezuela</span>
+              <span style={{ color: '#64748B' }}>tu</span>
+              <span style={{ color: '#059669' }}>Ayuda</span>
+              <span style={{ color: '#0F172A' }}>Venezuela</span>
             </h1>
           </button>
           <div className="flex items-center gap-2">
@@ -348,13 +342,6 @@ export default function App() {
             </button>
           </div>
         </header>
-
-        {/* Mobile flag stripe */}
-        <div className="flex h-1 w-full shrink-0 lg:hidden">
-          <div className="flex-1" style={{ backgroundColor: '#FCD116' }} />
-          <div className="flex-1" style={{ backgroundColor: '#003893' }} />
-          <div className="flex-1" style={{ backgroundColor: '#CF142B' }} />
-        </div>
 
         {/* Mobile search — only for mapa/lista */}
         {!isServicios && (
@@ -381,14 +368,14 @@ export default function App() {
               className="flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-2 text-xs font-semibold transition-all"
               style={
                 filtersOpen || activeLayer
-                  ? { borderColor: '#003893', backgroundColor: '#00389314', color: '#003893' }
+                  ? { borderColor: '#059669', backgroundColor: '#05966914', color: '#059669' }
                   : { borderColor: '#e5e7eb', backgroundColor: '#fff', color: '#6b7280' }
               }
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
               </svg>
-              {activeLayer ? LAYERS.find(l => l.id === activeLayer)?.glyph : null}
+              {activeLayer ? <LayerIcon tipo={activeLayer} size={14} /> : null}
             </button>
           </div>
         )}
@@ -448,7 +435,7 @@ export default function App() {
           <p className="text-[9px] leading-relaxed text-gray-400 text-center">
             {t('app.made_by')} <strong className="text-gray-500">{t('app.no_money')}</strong> {t('app.no_liability_short')}
             {' '}{t('app.contact_label_short')}{' '}
-            <a href="mailto:ingenierosvenezolanosunidos@gmail.com" className="text-[#003893] underline">
+            <a href="mailto:ingenierosvenezolanosunidos@gmail.com" className="text-brand underline">
               ingenierosvenezolanosunidos@gmail.com
             </a>
           </p>
@@ -467,12 +454,12 @@ export default function App() {
                   if (item.id !== 'servicios') setActiveLayer(null)
                 }}
                 className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-semibold transition-colors ${
-                  active ? 'text-[#003893]' : 'text-gray-400'
+                  active ? 'text-brand' : 'text-gray-400'
                 }`}
               >
                 {item.icon}
                 <span>{item.label}</span>
-                {active && <span className="h-0.5 w-6 rounded-full bg-[#003893]" />}
+                {active && <span className="h-0.5 w-6 rounded-full bg-brand" />}
               </button>
             )
           })}
