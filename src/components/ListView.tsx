@@ -18,13 +18,21 @@ function CardImage({ report, layer }: { report: Report; layer: LayerDef }) {
   const src = thumbUrl(report)
   if (src && !failed) {
     return (
-      <img
-        src={src}
-        alt={report.nombre}
-        loading="lazy"
-        onError={() => setFailed(true)}
-        className="h-full w-full bg-gray-100 object-contain"
-      />
+      <div className="relative h-full w-full overflow-hidden bg-gray-100">
+        {/* Blurred fill so the full photo shows without crop or empty bars */}
+        <div
+          className="absolute inset-0 scale-110 bg-cover bg-center blur-lg"
+          style={{ backgroundImage: `url("${src}")`, opacity: 0.55 }}
+          aria-hidden
+        />
+        <img
+          src={src}
+          alt={report.nombre}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="relative h-full w-full object-contain"
+        />
+      </div>
     )
   }
   return (

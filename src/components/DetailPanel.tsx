@@ -184,7 +184,14 @@ function CategoryBody({
             </div>
           )}
           {per?.foto_url && (
-            <img src={per.foto_url} alt={report.nombre} className="mb-3 h-48 w-full rounded-lg bg-gray-100 object-contain" loading="lazy" />
+            <div className="relative mb-3 h-48 w-full overflow-hidden rounded-lg bg-gray-100">
+              <div
+                className="absolute inset-0 scale-110 bg-cover bg-center blur-lg"
+                style={{ backgroundImage: `url("${per.foto_url}")`, opacity: 0.55 }}
+                aria-hidden
+              />
+              <img src={per.foto_url} alt={report.nombre} className="relative h-full w-full object-contain" loading="lazy" />
+            </div>
           )}
           <Field label={t('detail_panel.field_last_seen')} value={per?.ultima_vez_visto} />
           <Field label={t('detail_panel.field_description')} value={per?.descripcion ?? report.descripcion} />
@@ -312,12 +319,19 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
         <div className="overflow-y-auto px-4 py-3">
           {/* Foto del reporte */}
           {report.foto_url && report.tipo !== 'personas' && (
-            <img
-              src={report.foto_url}
-              alt={report.nombre}
-              className="mb-3 h-48 w-full rounded-xl bg-gray-100 object-contain"
-              loading="lazy"
-            />
+            <div className="relative mb-3 h-48 w-full overflow-hidden rounded-xl bg-gray-100">
+              <div
+                className="absolute inset-0 scale-110 bg-cover bg-center blur-lg"
+                style={{ backgroundImage: `url("${report.foto_url}")`, opacity: 0.55 }}
+                aria-hidden
+              />
+              <img
+                src={report.foto_url}
+                alt={report.nombre}
+                className="relative h-full w-full object-contain"
+                loading="lazy"
+              />
+            </div>
           )}
 
           {report.descripcion && report.tipo !== 'infra' && report.tipo !== 'emergencia' && report.tipo !== 'personas' && (
