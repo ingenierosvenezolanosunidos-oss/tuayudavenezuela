@@ -7,13 +7,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'tuAyudaVenezuela',
         short_name: 'tuAyuda',
         description: 'Plataforma comunitaria de ayuda y resiliencia para Venezuela',
         lang: 'es',
-        theme_color: '#2563EB',
+        theme_color: '#059669',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
