@@ -148,7 +148,7 @@ function CategoryBody({
                   <div key={l.id}>
                     {l.tipo === 'foto' ? (
                       <a href={l.url} target="_blank" rel="noopener noreferrer">
-                        <img src={l.url} alt={l.descripcion ?? ''} className="w-full rounded-lg object-cover max-h-48" loading="lazy" />
+                        <img src={l.url} alt={l.descripcion ?? ''} className="max-h-48 w-full rounded-lg bg-gray-100 object-contain" loading="lazy" />
                         {l.descripcion && <p className="mt-1 text-xs text-gray-500">{l.descripcion}</p>}
                       </a>
                     ) : (
@@ -184,7 +184,7 @@ function CategoryBody({
             </div>
           )}
           {per?.foto_url && (
-            <img src={per.foto_url} alt={report.nombre} className="mb-3 h-48 w-full rounded-lg object-cover" loading="lazy" />
+            <img src={per.foto_url} alt={report.nombre} className="mb-3 h-48 w-full rounded-lg bg-gray-100 object-contain" loading="lazy" />
           )}
           <Field label={t('detail_panel.field_last_seen')} value={per?.ultima_vez_visto} />
           <Field label={t('detail_panel.field_description')} value={per?.descripcion ?? report.descripcion} />
@@ -315,7 +315,7 @@ export default function DetailPanel({ report, onClose, onUpdateEstado, onLocaliz
             <img
               src={report.foto_url}
               alt={report.nombre}
-              className="mb-3 h-48 w-full rounded-xl object-cover"
+              className="mb-3 h-48 w-full rounded-xl bg-gray-100 object-contain"
               loading="lazy"
             />
           )}

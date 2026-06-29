@@ -23,7 +23,7 @@ function CardImage({ report, layer }: { report: Report; layer: LayerDef }) {
         alt={report.nombre}
         loading="lazy"
         onError={() => setFailed(true)}
-        className="h-full w-full object-cover"
+        className="h-full w-full bg-gray-100 object-contain"
       />
     )
   }
