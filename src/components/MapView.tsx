@@ -1,17 +1,24 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Circle, useMap } from 'react-leaflet'
 import type { Report, Tipo } from '../types'
 import { CARACAS_CENTER } from '../data/dummy'
 import { pinIcon } from './markers'
 import { LAYER_BY_ID } from '../layers'
 
+// Auto-fit the map to the visible points, but ONLY when the actual set of
+// points changes (load / filter / search) — never on a simple re-render such
+// as selecting a marker. Otherwise clicking a pin would zoom the map out.
 function FitBounds({ reports }: { reports: Report[] }) {
   const map = useMap()
+  const sig = reports.map((r) => r.id).join(',')
+  const latest = useRef(reports)
+  latest.current = reports
   useEffect(() => {
-    if (reports.length === 0) return
-    const bounds: [number, number][] = reports.map((r) => [r.lat, r.lng])
+    const pts = latest.current
+    if (pts.length === 0) return
+    const bounds: [number, number][] = pts.map((r) => [r.lat, r.lng])
     map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14, animate: true })
-  }, [reports, map])
+  }, [sig, map])
   return null
 }
 
@@ -34,9 +41,9 @@ function zonaWeight(r: Report): number {
 }
 
 export default function MapView({ reports, active, onSelect }: Props) {
-  const visible = reports.filter((r) => active.has(r.tipo))
-  const zonas = visible.filter((r) => r.tipo === 'necesidades')
-  const pins = visible.filter((r) => r.tipo !== 'necesidades')
+  const visible = useMemo(() => reports.filter((r) => active.has(r.tipo)), [reports, active])
+  const zonas = useMemo(() => visible.filter((r) => r.tipo === 'necesidades'), [visible])
+  const pins = useMemo(() => visible.filter((r) => r.tipo !== 'necesidades'), [visible])
 
   return (
     <MapContainer
