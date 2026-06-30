@@ -82,7 +82,6 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [scaleIdx, setScaleIdx] = useState(1)
   const [autoOpened, setAutoOpened] = useState(false)
-  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${TEXT_SCALES[scaleIdx]}px`
@@ -345,8 +344,8 @@ export default function App() {
 
         {/* Mobile search — only for mapa/lista */}
         {!isServicios && (
-          <div className="relative z-10 flex shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-3 py-2 lg:hidden">
-            <div className="relative flex-1">
+          <div className="relative z-10 shrink-0 border-b border-gray-200 bg-white px-3 py-2 lg:hidden">
+            <div className="relative">
               <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -362,21 +361,6 @@ export default function App() {
                 <button onClick={() => setQuery('')} aria-label={t('app.clear_search')} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">✕</button>
               )}
             </div>
-            <button
-              onClick={() => setFiltersOpen((o) => !o)}
-              aria-label={filtersOpen ? t('app.hide_filters') : t('app.show_filters')}
-              className="flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-2 text-xs font-semibold transition-all"
-              style={
-                filtersOpen || activeLayer
-                  ? { borderColor: '#059669', backgroundColor: '#05966914', color: '#059669' }
-                  : { borderColor: '#e5e7eb', backgroundColor: '#fff', color: '#6b7280' }
-              }
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
-              </svg>
-              {activeLayer ? <LayerIcon tipo={activeLayer} size={14} /> : null}
-            </button>
           </div>
         )}
 
@@ -387,14 +371,16 @@ export default function App() {
           </div>
         )}
 
-        {/* Layer chips — only for mapa/lista; on mobile Servicios is in the bottom nav */}
-        {!isServicios && filtersOpen && (
-          <div className="relative z-10 shrink-0 border-b border-gray-200 bg-white shadow-card lg:hidden">
+        {/* Layer chips grid — always visible on mobile, above the content */}
+        {!isServicios && (
+          <div className="relative z-10 shrink-0 border-b border-gray-200 bg-white lg:hidden">
             <LayerToggle
               active={activeSet}
               counts={counts}
-              onSelect={(t) => { selectLayer(t); setFiltersOpen(false) }}
-              onAll={() => { selectAll(); setFiltersOpen(false) }}
+              onSelect={selectLayer}
+              onAll={selectAll}
+              serviciosActive={isServicios}
+              onServicios={openServicios}
             />
           </div>
         )}
@@ -417,19 +403,6 @@ export default function App() {
           )}
         </main>
 
-        {/* Full-width Crear button — hidden in Servicios view */}
-        {!isServicios && (
-          <div className="z-10 shrink-0 border-t border-gray-100 bg-white p-3">
-            <button
-              onClick={() => setFormOpen(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-4 text-base font-bold text-white shadow-sm transition-colors hover:bg-brand-dark active:scale-[.98]"
-            >
-              <span className="text-xl leading-none">＋</span>
-              <span>{t('nav.create')}</span>
-            </button>
-          </div>
-        )}
-
         {/* Mobile disclaimer */}
         <div className="z-10 shrink-0 border-t border-gray-100 bg-gray-50 px-4 py-2 lg:hidden">
           <p className="text-[9px] leading-relaxed text-gray-400 text-center">
@@ -441,28 +414,43 @@ export default function App() {
           </p>
         </div>
 
-        {/* Mobile bottom nav — Mapa / Lista / Servicios */}
-        <nav className="z-10 flex shrink-0 border-t border-gray-200 bg-white lg:hidden">
-          {NAV_ITEMS.map((item) => {
-            const active = view === item.id
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setView(item.id)
-                  // Leaving a content view resets layer filter
-                  if (item.id !== 'servicios') setActiveLayer(null)
-                }}
-                className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-semibold transition-colors ${
-                  active ? 'text-brand' : 'text-gray-400'
-                }`}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-                {active && <span className="h-0.5 w-6 rounded-full bg-brand" />}
-              </button>
-            )
-          })}
+        {/* Mobile bottom nav — Lista · Crear(+) · Mapa */}
+        <nav className="z-10 flex shrink-0 items-end justify-around border-t border-gray-200 bg-white px-2 pb-1 pt-1 lg:hidden">
+          {/* Lista */}
+          <button
+            onClick={() => { setView('lista'); setActiveLayer(null) }}
+            className={`flex flex-1 flex-col items-center gap-0.5 py-1.5 text-xs font-semibold transition-colors ${
+              !isServicios && view === 'lista' ? 'text-brand' : 'text-gray-400'
+            }`}
+          >
+            {NAV_ITEMS.find((i) => i.id === 'lista')?.icon}
+            <span>{t('nav.list')}</span>
+          </button>
+
+          {/* Crear — centro, más grande */}
+          <button
+            onClick={() => setFormOpen(true)}
+            aria-label={t('nav.create')}
+            className="flex flex-1 flex-col items-center"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-white shadow-md transition-transform active:scale-95">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </span>
+            <span className="mt-0.5 text-[11px] font-bold text-brand">{t('nav.create')}</span>
+          </button>
+
+          {/* Mapa */}
+          <button
+            onClick={() => { setView('mapa'); setActiveLayer(null) }}
+            className={`flex flex-1 flex-col items-center gap-0.5 py-1.5 text-xs font-semibold transition-colors ${
+              !isServicios && view === 'mapa' ? 'text-brand' : 'text-gray-400'
+            }`}
+          >
+            {NAV_ITEMS.find((i) => i.id === 'mapa')?.icon}
+            <span>{t('nav.map')}</span>
+          </button>
         </nav>
       </div>
 
